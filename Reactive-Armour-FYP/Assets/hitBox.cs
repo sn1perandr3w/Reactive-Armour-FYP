@@ -36,8 +36,9 @@ public class hitBox : MonoBehaviour
                 {
                     print("HITLOOP2");
                     if(enemy != null && !enemiesHit.Contains(enemy)) {
-                    enemy.GetComponent<enemyController>().lowerHealth(Mathf.RoundToInt(damage));
-                    enemiesHit.Add(enemy);
+                        
+                        enemy.GetComponent<enemyController>().KnockBack(transform.parent, 0.2f, 15.0f);
+                        enemiesHit.Add(enemy);
                         }
                 }
             }

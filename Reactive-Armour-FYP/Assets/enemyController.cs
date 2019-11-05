@@ -18,7 +18,7 @@ public class enemyController : MonoBehaviour
 	float rotationalDamp = 60.0f;
 
 	float movementSpeed = 10.0f;
-	CharacterController cc;
+	public CharacterController cc;
 
 	public List<GameObject> civilians;
 
@@ -74,6 +74,12 @@ public class enemyController : MonoBehaviour
 	public GameObject projectile;
 
 	public GameObject[] itemDrop;
+
+    bool knockedBack = false;
+
+    float timeUntilKnockbackEnds = 0.0f;
+
+    float knockbackForce = 0.0f;
 
 	void Start ()
 	{
@@ -163,9 +169,18 @@ public class enemyController : MonoBehaviour
 		if (attackCooldown > 0) {
 			attackCooldown -= Time.deltaTime;
 		}
-			
 
-		if (info.IsName ("Pursuing")) {
+
+        if (timeUntilKnockbackEnds > 0.0f)
+        {
+            cc.Move(-transform.forward * knockbackForce * Time.deltaTime);
+            timeUntilKnockbackEnds -= Time.deltaTime;
+            //print("KNOCKBACK TIME = " + timeUntilKnockbackEnds);
+            //knockbackForce = knockbackForce * knockbackTime;
+        }
+
+        /*
+        if (info.IsName ("Pursuing")) {
 			//print ("PURSUING");
 			CollisionAvoidance ();
 			Move ();
@@ -204,6 +219,7 @@ public class enemyController : MonoBehaviour
 			//print ("STUNNED");
 			stun ();
 		}
+        */
 	}
 
 	//Creates a melee attack using a raycast
@@ -350,9 +366,21 @@ public class enemyController : MonoBehaviour
 		cc.Move (transform.forward * movementSpeed * Time.deltaTime);
 	}
 
-	//Causes strafing when in combat.
+    public void KnockBack(Transform hit, float knockbackTime, float knockbackForce)
+    {
+        timeUntilKnockbackEnds = knockbackTime;
+        this.knockbackForce = knockbackForce;
 
-	void combatStrafe ()
+        Vector3 pos = hit.position - transform.position;
+        Quaternion rotation = Quaternion.LookRotation(pos);
+
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationalDamp * Time.deltaTime);
+    }
+
+
+    //Causes strafing when in combat.
+
+    void combatStrafe ()
 	{
 		
 		//print ("DIRECTION SELECTED! " + strafeDir);

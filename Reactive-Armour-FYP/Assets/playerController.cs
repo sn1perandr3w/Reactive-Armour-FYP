@@ -45,6 +45,10 @@ public class playerController : MonoBehaviour
 
     public GameObject swordHitbox;
 
+    int comboHit = 0;
+
+    float comboTimer = 1.0f;
+
 	void Start()
 	{
         swordHitbox = this.gameObject.transform.GetChild(2).gameObject;
@@ -117,7 +121,22 @@ public class playerController : MonoBehaviour
 			attackCooldown -= Time.deltaTime;
 		}
 
-	}
+        if (comboHit > 3)
+        {
+            comboHit = 0;
+        }
+
+
+        if (comboTimer > 0)
+        {
+            comboTimer -= Time.deltaTime;
+        }
+        else
+        {
+            comboHit = 0;
+        }
+
+    }
 
 
 
@@ -227,8 +246,16 @@ public class playerController : MonoBehaviour
 
 		if (weaponSelect == 0 && attackCooldown <= 0.0f) {
             swordHitbox.GetComponent<hitBox>().hitboxActive(1,2.0f,0.25f,25);
-            attackCooldown = 0.25f;
+            attackCooldown = 0.4f;
+ 
+            comboHit++;
+            comboTimer = 1.0f;
+            print("COMBOHIT = " + comboHit);
 
+            if (comboHit == 4)
+            {
+                print("KNOCKBACK");
+            }
             /*
 				if (Physics.Raycast (transform.position + (transform.forward * 1.0f), transform.forward * 10.0f, out hit)) {
 					print ("Player Hit: " + hit.transform.gameObject);
