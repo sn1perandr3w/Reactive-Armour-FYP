@@ -1429,6 +1429,7 @@ MonoBehaviour:
   explosionSound: {fileID: 1952817658564360, guid: ccaa772883196164fbf254630f48e52c,
     type: 3}
   enemyName: 
+  cc: {fileID: 0}
   civilians: []
   currentHitObject: {fileID: 0}
   sphereRadius: 2
@@ -1528,6 +1529,7 @@ MonoBehaviour:
   explosionSound: {fileID: 1952817658564360, guid: ccaa772883196164fbf254630f48e52c,
     type: 3}
   enemyName: 
+  cc: {fileID: 0}
   civilians: []
   currentHitObject: {fileID: 0}
   sphereRadius: 2
@@ -3154,8 +3156,27 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1062120453602406, guid: e41985b88641bdb4585868535a3af673, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4054575625725580, guid: e41985b88641bdb4585868535a3af673, type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
+        type: 3}
+      propertyPath: lowHealth
+      value: 
+      objectReference: {fileID: 8300000, guid: 1c075da845261b142bcdf2b7cb521ad2, type: 3}
+    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
+        type: 3}
+      propertyPath: sniperShot
+      value: 
+      objectReference: {fileID: 8300000, guid: c2196f9eaf3a8954fa0fa8ae8a331764, type: 3}
+    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
+        type: 3}
+      propertyPath: swordHit
+      value: 
+      objectReference: {fileID: 8300000, guid: 9e87b45739799404f8266ecdd74b43f9, type: 3}
     - target: {fileID: 4795033733293416, guid: e41985b88641bdb4585868535a3af673, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.9349384
@@ -3191,25 +3212,6 @@ PrefabInstance:
     - target: {fileID: 1629863494477040, guid: e41985b88641bdb4585868535a3af673, type: 3}
       propertyPath: m_IsActive
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: lowHealth
-      value: 
-      objectReference: {fileID: 8300000, guid: 1c075da845261b142bcdf2b7cb521ad2, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: sniperShot
-      value: 
-      objectReference: {fileID: 8300000, guid: c2196f9eaf3a8954fa0fa8ae8a331764, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: swordHit
-      value: 
-      objectReference: {fileID: 8300000, guid: 9e87b45739799404f8266ecdd74b43f9, type: 3}
-    - target: {fileID: 4054575625725580, guid: e41985b88641bdb4585868535a3af673, type: 3}
-      propertyPath: m_RootOrder
-      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e41985b88641bdb4585868535a3af673, type: 3}
@@ -3455,7 +3457,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1422725697478738, guid: 6fbded8c3680f144e955596fff161d25, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4265322805897478, guid: 6fbded8c3680f144e955596fff161d25, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4150752373728730, guid: 6fbded8c3680f144e955596fff161d25, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3512,10 +3518,6 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 1317494023745362, guid: 6fbded8c3680f144e955596fff161d25, type: 3}
       propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4265322805897478, guid: 6fbded8c3680f144e955596fff161d25, type: 3}
-      propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -4524,6 +4526,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerCamera (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1910418570948204, guid: ce7e806364c42e64caee9df8a226367d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4503852687004446, guid: ce7e806364c42e64caee9df8a226367d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9.681957
@@ -5004,6 +5010,10 @@ PrefabInstance:
     - target: {fileID: 1136001128269488, guid: 5b0eebcec82dfb04dbc39bfb485d264e, type: 3}
       propertyPath: m_Name
       value: Player (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1136001128269488, guid: 5b0eebcec82dfb04dbc39bfb485d264e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4854865859703908, guid: 5b0eebcec82dfb04dbc39bfb485d264e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5634,6 +5644,7 @@ MonoBehaviour:
   explosionSound: {fileID: 1952817658564360, guid: ccaa772883196164fbf254630f48e52c,
     type: 3}
   enemyName: 
+  cc: {fileID: 0}
   civilians: []
   currentHitObject: {fileID: 0}
   sphereRadius: 2
@@ -7549,6 +7560,7 @@ MonoBehaviour:
   explosionSound: {fileID: 1952817658564360, guid: ccaa772883196164fbf254630f48e52c,
     type: 3}
   enemyName: 
+  cc: {fileID: 0}
   civilians: []
   currentHitObject: {fileID: 0}
   sphereRadius: 2

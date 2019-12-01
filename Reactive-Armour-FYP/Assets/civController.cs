@@ -23,12 +23,14 @@ public class civController : MonoBehaviour {
 
 		print ("MAP CIV AMOUNT: " + mapCivAmount);
 		print ("ACTUAL CIV AMOUNT: " + actualCivAmount);
-	}
+
+        GameObject.Find("UICivilians").GetComponent<Text>().text = "Civilians in area: " + actualCivAmount;
+    }
 	
 	// Update is called once per frame
 	void Update () {
 
-		GameObject.Find ("UICivilians").GetComponent<Text> ().text = "Civilians in area: " + actualCivAmount;
+	
 
 
 	}
@@ -36,6 +38,7 @@ public class civController : MonoBehaviour {
 	public void lowerCivAmount(int amount)
 	{
 		actualCivAmount -= amount;
-	}
+        GameObject.Find("UICivilians").GetComponent<Text>().text = "Civilians in area: " + actualCivAmount;
+    }
 
 }

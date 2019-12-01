@@ -75,13 +75,17 @@ public class enemyController : MonoBehaviour
 
 	public GameObject[] itemDrop;
 
-    bool knockedBack = false;
 
-    float timeUntilKnockbackEnds = 0.0f;
 
-    float knockbackForce = 0.0f;
+    public Transform receivedHit;
+    public float knockbackTime;
+    public float knockbackForce;
 
-	void Start ()
+    string triggerForReturn;
+
+
+
+    void Start ()
 	{
 		anim = GetComponent<Animator> ();
 		cc = GetComponent<CharacterController> ();
@@ -90,10 +94,10 @@ public class enemyController : MonoBehaviour
 
 
 		if (target != null && target.transform.tag == "player") {
-			anim.SetBool ("pursue", true);
+			anim.SetTrigger ("pursue");
 		} else if (patrolWaypoints.Length != 0) {
 			target = patrolWaypoints [0].transform;
-			anim.SetBool ("patrol", true);
+			anim.SetTrigger ("patrol");
 		}
 
 		selection = Random.Range (1, 4);
@@ -132,36 +136,16 @@ public class enemyController : MonoBehaviour
 
 		Debug.DrawRay (transform.position, transform.forward * 3.0f, Color.blue);
 
-		guarding = false;
-
-
-		/*
-		if (target != null && target.transform.tag == "player" && info.IsName("CombatCiv")) {
-			anim.SetBool ("pursue", true);
-			anim.SetBool ("combatCiv", false);
-		} else if (patrolWaypoints.Length != 0 && info.IsName("CombatCiv")) {
-			target = patrolWaypoints [0].transform;
-			anim.SetBool ("patrol", true);
-			anim.SetBool ("combatCiv", false);
-		}
-*/
 
 
 
 		if (distanceToPlayer < 100.0f && pursueBuffer <= 0.0f && (info.IsName("Patrolling") || info.IsName("Searching") || info.IsName("CombatCiv"))) {
 			
 				pursueBuffer = 2.0f;
-
-
 				
 				target = player.transform;
 
-				anim.SetBool ("patrol", false);
-				anim.SetBool ("search", false);
-			    anim.SetBool ("combatCiv", false);
-				anim.SetBool ("combat", false);
-				anim.SetBool ("rangedAttackCiv", false);
-				anim.SetBool ("pursue", true);
+            anim.SetTrigger("pursue");
 
 
 		}
@@ -171,55 +155,85 @@ public class enemyController : MonoBehaviour
 		}
 
 
-        if (timeUntilKnockbackEnds > 0.0f)
+        
+
+
+        if (info.IsName("Pursuing"))
         {
-            cc.Move(-transform.forward * knockbackForce * Time.deltaTime);
-            timeUntilKnockbackEnds -= Time.deltaTime;
-            //print("KNOCKBACK TIME = " + timeUntilKnockbackEnds);
-            //knockbackForce = knockbackForce * knockbackTime;
+            //print ("PURSUING");
+            CollisionAvoidance();
+            Move();
         }
+        else if (info.IsName("Patrolling"))
+        {
+            //print ("PATROLLING");
+            CollisionAvoidance();
+            CheckForCivTargets();
+            Move();
 
-        /*
-        if (info.IsName ("Pursuing")) {
-			//print ("PURSUING");
-			CollisionAvoidance ();
-			Move ();
-		} else if (info.IsName ("Patrolling")) {
-			//print ("PATROLLING");
-			CollisionAvoidance ();
-			CheckForCivTargets ();
-			Move ();
+        }
+        else if (info.IsName("Searching"))
+        {
+            //print ("SEARCHING");
+            LowerPursueBuffer();
+            //CollisionAvoidance ();
+            Move();
+            Turn();
+        }
+        else if (info.IsName("Combat"))
+        {
+            //print ("COMBATTING");
+            combatMove();
+        }
+        else if (info.IsName("MeleeAttack"))
+        {
+            //print ("MELEE ATTACKING");
+            meleeAttack();
+        }
+        else if (info.IsName("RangedAttack"))
+        {
+            //print ("RANGED ATTACKING");
+            rangedAttack();
+        }
+        else if (info.IsName("Guard"))
+        {
+            //print ("GUARDING");
+            guard();
+        }
+        else if (info.IsName("CombatCiv"))
+        {
+            //print ("CombattingCiv");
+            Turn();
+        }
+        else if (info.IsName("Stunned"))
+        {
+            if (stunTime > 0.0f)
+            {
+                stunTime -= Time.deltaTime;
+            }
+            else
+            {
+                anim.SetTrigger(triggerForReturn);
+            }
+        }
+        else if (info.IsName("Knockback"))
+        {
 
-		} else if (info.IsName ("Searching")) {
-			//print ("SEARCHING");
-			LowerPursueBuffer ();
-			//CollisionAvoidance ();
-			Move();
-			Turn ();
-		} else if (info.IsName ("Combat")) {
-			//print ("COMBATTING");
-			combatMove ();
-		} else if (info.IsName ("MeleeAttack")) {
-			//print ("MELEE ATTACKING");
-			meleeAttack ();
-		}
-		if (info.IsName ("RangedAttack")) {
-			//print ("RANGED ATTACKING");
-			rangedAttack ();
-		}
-		if (info.IsName ("Guard")) {
-			//print ("GUARDING");
-			guard ();
-		}
-		if (info.IsName ("CombatCiv")) {
-			//print ("CombattingCiv");
-			Turn();
-		}
-		if (info.IsName ("Stunned")) {
-			//print ("STUNNED");
-			stun ();
-		}
-        */
+            if (knockbackTime > 0.0f)
+            {
+                cc.Move(-transform.forward * knockbackForce * Time.deltaTime);
+                knockbackTime -= Time.deltaTime;
+                //print("KNOCKBACK TIME = " + timeUntilKnockbackEnds);
+                //knockbackForce = knockbackForce * knockbackTime;
+            }
+            else
+            {
+                anim.SetTrigger(triggerForReturn);
+            }
+
+
+        }
+        
 	}
 
 	//Creates a melee attack using a raycast
@@ -239,9 +253,8 @@ public class enemyController : MonoBehaviour
 			}
 		}
 		attackCooldown = 4.0f;
-		anim.SetBool ("combat", true);
-		anim.SetBool ("meleeAttack", false);
-		newSelection ();
+        anim.SetTrigger("combat");
+        newSelection ();
 	}
 
 	//Creates a ranged attack using a raycast.
@@ -256,18 +269,8 @@ public class enemyController : MonoBehaviour
 			Destroy (g, 1);
 		}
 
+            anim.SetTrigger(triggerForReturn);
 
-		if (anim.GetBool ("combat") == false && anim.GetBool ("rangedAttack") == true){
-			anim.SetBool ("combat", true);
-		anim.SetBool ("rangedAttack", false);
-		newSelection ();
-		}
-		else 
-		if(anim.GetBool ("combatCiv") == false && anim.GetBool ("rangedAttackCiv") == true)
-		{
-				anim.SetBool ("combatCiv", true);
-				anim.SetBool ("rangedAttackCiv", false);
-		}
 	}
 
 	//Avoids obstacles and calls Turn if not doing so.
@@ -349,9 +352,8 @@ public class enemyController : MonoBehaviour
 				float enemyDistanceToCivTarget = Vector3.Distance (this.transform.position, civTarget.transform.position);
 				if (enemyDistanceToCivTarget <= 200.0f) {
 					target = civTarget.transform;
-					anim.SetBool ("combatCiv", true);
-					anim.SetBool ("patrol", false);
-				} 
+                    anim.SetTrigger("combatCiv");
+                } 
 			} else if (civTarget == null) {
 				civilians.Remove (civTarget);
 			}
@@ -361,20 +363,33 @@ public class enemyController : MonoBehaviour
 
 	//Advances NPC towards target.
 
-	void Move ()
+	void Move()
 	{
+        //print("Moving");
 		cc.Move (transform.forward * movementSpeed * Time.deltaTime);
 	}
 
-    public void KnockBack(Transform hit, float knockbackTime, float knockbackForce)
+    public void initKnockBack(Transform receivedHit, float knockbackTime, float knockbackForce)
     {
-        timeUntilKnockbackEnds = knockbackTime;
+        this.knockbackTime = knockbackTime;
         this.knockbackForce = knockbackForce;
 
-        Vector3 pos = hit.position - transform.position;
+        Vector3 pos = receivedHit.position - transform.position;
         Quaternion rotation = Quaternion.LookRotation(pos);
 
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationalDamp * Time.deltaTime);
+        anim.SetTrigger("knockback");
+        print("KNOCKBACK SET");
+        
+
+        if (info.IsName("Pursuing"))
+        {
+            triggerForReturn = "pursue";
+        }
+        else
+        {
+            triggerForReturn = "combat";
+        }
     }
 
 
@@ -410,9 +425,8 @@ public class enemyController : MonoBehaviour
 		if (target == null && info.IsName("CombatCiv")) 
 		{
 			target = patrolWaypoints [waypointNum].transform;
-			anim.SetBool ("combatCiv", false);
-			anim.SetBool ("patrol", true);
-		}
+            anim.SetTrigger("patrol");
+        }
 
 
 		Vector3 pos = target.position - transform.position;
@@ -431,31 +445,24 @@ public class enemyController : MonoBehaviour
 				GameObject lastKnownPosWP = GameObject.Instantiate (lastKnownPosWayPoint, target.position, Quaternion.identity);
 				target = lastKnownPosWP.transform;
 
-				anim.SetBool ("pursue", false);
-				anim.SetBool ("search", true);
-			} else if (distance < 20 && target.transform.tag == "player") {
-				
-				anim.SetBool ("pursue", false);
-				anim.SetBool ("combat", true);
+                anim.SetTrigger("search");
+            } else if (distance < 20 && target.transform.tag == "player") {
+
+                anim.SetTrigger("combat"); ;
 			}
 		}
-
+        else
 		if (info.IsName ("CombatCiv")) {
 
-			if(anim.GetBool("pursue") == true)
-			{
-				anim.SetBool ("combatCiv", false);
-			}
 
 			if (distance >= 40.0f) {
 				Move ();
 			} else
 			{
-				anim.SetBool ("combatCiv", false);
-				anim.SetBool ("rangedAttackCiv", true);
-			}
+                anim.SetTrigger("ranged");
+            }
 		}
-
+        else
 		if (info.IsName ("Searching") && target.tag == "lastKnownWayPoint") {
 			if (distance > 3.0f) {
 				Move ();
@@ -469,9 +476,8 @@ public class enemyController : MonoBehaviour
 					target = patrolWaypoints [waypointNum].transform;
 					distance = Vector3.Distance (transform.position, target.position);
 
-					anim.SetBool ("search", false);
-					anim.SetBool ("patrol", true);
-					timeUntilPatrol = 0.0f;
+                    anim.SetTrigger("patrol");
+                    timeUntilPatrol = 0.0f;
 				}
 			}
 		}
@@ -495,18 +501,22 @@ public class enemyController : MonoBehaviour
 		}
 	}
 
-	//Prevents from performing actions (UNUSED SO FAR)
+	//Prevents from performing actions
 
-	public void stun ()
+	public void initStun (float stunTime)
 	{
-		stunTime += Time.deltaTime;
-		if (stunTime > 1) {
-			stunTime = 0;
+        this.stunTime = stunTime;
 
-			anim.SetBool ("stun", false);
-			anim.SetBool ("combat", true);
-		}
-	}
+        if (info.IsName("Pursuing"))
+        {
+            triggerForReturn = "pursue";
+        }
+        else
+        {
+            triggerForReturn = "combat";
+        }
+        anim.SetTrigger("stun");
+    }
 
 	//Prevents from taking damage
 
@@ -517,9 +527,8 @@ public class enemyController : MonoBehaviour
 			guarding = true;
 		}
 
-		anim.SetBool ("guard", false);
-		anim.SetBool ("combat", true);
-		guardTime = 0;
+        anim.SetTrigger("combat");
+        guardTime = 0;
 		attackCooldown = 3.0f;
 		newSelection ();
 	}
@@ -535,25 +544,21 @@ public class enemyController : MonoBehaviour
 		} else if (distanceToPlayer <= 4.0f) {
 			combatStrafe ();
 		} else {
-			anim.SetBool ("combat", false);
-			anim.SetBool ("pursue", true);	
-		}
+            anim.SetTrigger("pursue");
+        }
 
 		print ("SELECTION = " + selection);
 		if (attackCooldown <= 0.0f) {
 			if (selection == 1 && distanceToPlayer <= 4.0f) {
-				
-				anim.SetBool ("combat", false);
-				anim.SetBool ("meleeAttack", true);
-			} else if (selection == 2) {
 
-				anim.SetBool ("combat", false);
-				anim.SetBool ("rangedAttack", true);
-			} else if (selection == 3) {
-				
-				anim.SetBool ("combat", false);
-				anim.SetBool ("guard", true);
-			}
+                anim.SetTrigger("melee");
+            } else if (selection == 2) {
+
+                anim.SetTrigger("ranged");
+            } else if (selection == 3) {
+
+                anim.SetTrigger("guard");
+            }
 		}
 	}
 
@@ -616,47 +621,8 @@ public class enemyController : MonoBehaviour
 			Destroy (this.gameObject);
 		}
 
-		if (anim.GetBool ("rangedAttackCiv") == false) {
-
-			anim.SetBool ("stun", true);
-			anim.SetBool ("guard", false);
-			anim.SetBool ("rangedAttack", false);
-			anim.SetBool ("meleeAttack", false);
-			anim.SetBool ("combat", false);
-		}
 
 		print ("Enemy: " + gameObject.name  + " Lowered health by " + amount + " health = " + health);
 	}
-
-	//Draws debug lines/spherecasts
-	/*
-	private void OnDrawGizmosSelected ()
-	{
-		Gizmos.color = Color.red;
-		Debug.DrawLine (origin, origin + direction * maxDistance);
-		Gizmos.DrawWireSphere (origin + direction * currentHitDistance, sphereRadius);
-		Gizmos.color = Color.blue;
-		Gizmos.DrawWireSphere (origin + dir1 * maxDistance, sphereRadius);
-		Debug.DrawLine (origin, origin + dir1 * maxDistance);
-		Gizmos.DrawWireSphere (origin + dir2 * maxDistance, sphereRadius);
-		Debug.DrawLine (origin, origin + dir2 * maxDistance);
-		Gizmos.DrawWireSphere (origin + dir3 * maxDistance, sphereRadius);
-		Debug.DrawLine (origin, origin + dir3 * maxDistance);
-		Gizmos.DrawWireSphere (origin + dir4 * maxDistance, sphereRadius);
-		Debug.DrawLine (origin, origin + dir4 * maxDistance);
-
-
-		
-		Debug.DrawLine (origin + dir1 * maxDistance, target.position);
-		Debug.DrawLine (origin + dir2 * maxDistance, target.position);
-		Debug.DrawLine (origin + dir3 * maxDistance, target.position);
-		Debug.DrawLine (origin + dir4 * maxDistance, target.position);
-	
-
-		//FIX
-		//Gizmos.DrawWireSphere ((origin + dir1 * maxDistance), sphereRadius);
-		
-	}
-	*/
 
 }

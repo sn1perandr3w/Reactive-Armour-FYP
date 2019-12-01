@@ -9,6 +9,7 @@ public class hitBox : MonoBehaviour
     public List<GameObject> enemiesHit;
     float timeUntilStop;
     bool activeHitbox;
+    int comboHit;
 
     int damage;
     int knockBack;
@@ -36,8 +37,20 @@ public class hitBox : MonoBehaviour
                 {
                     print("HITLOOP2");
                     if(enemy != null && !enemiesHit.Contains(enemy)) {
-                        
-                        enemy.GetComponent<enemyController>().KnockBack(transform.parent, 0.2f, 15.0f);
+
+                        print("COMBO HIT = " + comboHit);
+
+                        if (comboHit >= 4)
+                        {
+                            //print("KNOCKBACK FROM HITBOX");
+                            enemy.GetComponent<enemyController>().initKnockBack(transform.parent, 0.2f, 40.0f);
+                        }
+                        else
+                        {
+                            //print("STUN FROM HITBOX");
+                            enemy.GetComponent<enemyController>().initStun(0.1f);
+                        }
+                        enemy.GetComponent<enemyController>().lowerHealth(damage);
                         enemiesHit.Add(enemy);
                         }
                 }
@@ -61,7 +74,7 @@ public class hitBox : MonoBehaviour
 
     private void OnTriggerStay(Collider collidedObject)
     {
-        print("COLLIDING WITH " + collidedObject);
+        //print("COLLIDING WITH " + collidedObject);
         if (collidedObject.gameObject.tag == "enemy" && activeHitbox)
         {
             if (!enemiesToHit.Contains(collidedObject.gameObject))
@@ -78,12 +91,13 @@ public class hitBox : MonoBehaviour
         activeHitbox = false;
     }
 
-    public void hitboxActive(int knockBack, float stunTime,float timeUntilStop, int damage)
+    public void hitboxActive(int knockBack, float stunTime,float timeUntilStop, int damage, int comboHit)
     {
         this.knockBack = knockBack;
         this.stunTime = stunTime;
         this.damage = damage;
         this.timeUntilStop = timeUntilStop;
+        this.comboHit = comboHit;
         activeHitbox = true;
         print("ACTIVATING");
     }

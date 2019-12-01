@@ -49,7 +49,18 @@ public class playerController : MonoBehaviour
 
     float comboTimer = 1.0f;
 
-	void Start()
+    bool lunging = false;
+
+    float lungeTime = 0.2f;
+
+    public GameObject pauseMenu;
+    public GameObject HUD;
+
+    public bool pausedGame = false;
+
+    public GameObject playerCamera;
+
+    void Start()
 	{
         swordHitbox = this.gameObject.transform.GetChild(2).gameObject;
 
@@ -95,47 +106,66 @@ public class playerController : MonoBehaviour
 		}
 
 		damageMultiplier = 1.0f * level;
-	}
+
+        playerCamera = GameObject.Find("PlayerCamera");
+    }
 
 	void Update()
 	{
-        if (!cc)
+        if (pausedGame == false)
         {
-            print(cc);
+            if (!cc)
+            {
+                print(cc);
+            }
+
+            //print ("EXPERIENCE = " + experience + " LEVEL = " + level);
+
+
+
+            GameObject.Find("UIHealth").GetComponent<Text>().text = "Health: " + health + "%";
+            GameObject.Find("UIWeapon").GetComponent<Text>().text = "Subweapon:" + weaponList[weaponSelect];
+            GameObject.Find("UIAmmo").GetComponent<Text>().text = "Subweapon Ammo: " + ammo;
+            GameObject.Find("UIObjective").GetComponent<Text>().text = "Objective:";
+            GameObject.Find("UIObjective2").GetComponent<Text>().text = objective;
+            GameObject.Find("UITotalCivs").GetComponent<Text>().text = "Total Saved: " + civSaved;
+            GameObject.Find("UILevel").GetComponent<Text>().text = "Level: " + level;
+
+            Debug.DrawRay(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, Color.red);
+
+
+            if (attackCooldown > 0)
+            {
+                attackCooldown -= Time.deltaTime;
+            }
+
+            if (comboHit > 3)
+            {
+                comboHit = 0;
+            }
+
+
+            if (comboTimer > 0)
+            {
+                comboTimer -= Time.deltaTime;
+            }
+            else
+            {
+                comboHit = 0;
+            }
+
+            if (lunging == true)
+            {
+                cc.Move(transform.forward * 20.0f * Time.deltaTime);
+                lungeTime -= Time.deltaTime;
+
+                if (lungeTime <= 0.0f)
+                {
+                    lunging = false;
+                }
+
+            }
         }
-
-		//print ("EXPERIENCE = " + experience + " LEVEL = " + level);
-		GameObject.Find ("UIHealth").GetComponent<Text> ().text = "Health: " + health + "%";
-		GameObject.Find ("UIWeapon").GetComponent<Text> ().text = "Subweapon:" + weaponList[weaponSelect];
-		GameObject.Find ("UIAmmo").GetComponent<Text> ().text = "Subweapon Ammo: " + ammo;
-		GameObject.Find ("UIObjective").GetComponent<Text> ().text = "Objective:";
-		GameObject.Find ("UIObjective2").GetComponent<Text> ().text = objective;
-		GameObject.Find ("UITotalCivs").GetComponent<Text> ().text = "Total Saved: " + civSaved;
-		GameObject.Find ("UILevel").GetComponent<Text> ().text = "Level: " + level;
-
-		Debug.DrawRay (transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, Color.red);
-
-
-		if(attackCooldown > 0)
-		{
-			attackCooldown -= Time.deltaTime;
-		}
-
-        if (comboHit > 3)
-        {
-            comboHit = 0;
-        }
-
-
-        if (comboTimer > 0)
-        {
-            comboTimer -= Time.deltaTime;
-        }
-        else
-        {
-            comboHit = 0;
-        }
-
     }
 
 
@@ -245,10 +275,13 @@ public class playerController : MonoBehaviour
 	{
 
 		if (weaponSelect == 0 && attackCooldown <= 0.0f) {
-            swordHitbox.GetComponent<hitBox>().hitboxActive(1,2.0f,0.25f,25);
-            attackCooldown = 0.4f;
- 
+            lunging = true;
+            lungeTime = 0.2f;
             comboHit++;
+            swordHitbox.GetComponent<hitBox>().hitboxActive(1,2.0f,0.25f,25, comboHit);
+            attackCooldown = 0.4f;
+
+            
             comboTimer = 1.0f;
             print("COMBOHIT = " + comboHit);
 
@@ -309,7 +342,12 @@ public class playerController : MonoBehaviour
 			increaseHealth(100);
 			Destroy(col.gameObject);
 		}
-	}
+
+        if (col.gameObject.tag == "OBJPickup")
+        {
+            Destroy(col.gameObject);
+        }
+    }
 
 	void OnTriggerStay(Collider col)
 	{
@@ -352,12 +390,38 @@ public class playerController : MonoBehaviour
 
 		if (Input.GetKeyDown (KeyCode.F1)) {
 
+           
+
 			if (Time.timeScale == 1) {
 				Time.timeScale = 0;
-			} else 
+                pausedGame = true;
+                playerCamera.GetComponent<ThirdPersonCamera>().pausedGame = true;
+
+                pauseMenu.SetActive(true);
+                HUD.SetActive(false);
+                //pauseMenu.GetComponent<Text>().text = "Objectives:" + "\n";
+                GameObject statsText = GameObject.Find("StatsText");
+                statsText.GetComponent<Text>().text = "Mech Status:" + "\n";
+                statsText.GetComponent<Text>().text += "Health: " + health + "%" + "\n";
+                statsText.GetComponent<Text>().text += "Subweapon Ammo: " + ammo + "%" + "\n";
+                statsText.GetComponent<Text>().text += "\n" + "\n" + "Subweapons: " + "\n";
+
+                for (int i = 0; i < weaponList.Length; i++)
+                {
+                    statsText.GetComponent<Text>().text += "- " + weaponList[i] + "\n";
+                }
+
+
+            } else 
 			{
 				Time.timeScale = 1;
-			}
+                pausedGame = false;
+                playerCamera.GetComponent<ThirdPersonCamera>().pausedGame = false;
+
+                pauseMenu.SetActive(false);
+                HUD.SetActive(true);
+                
+            }
 		} 
 
 		if (Input.GetKeyDown (KeyCode.Tab)) {
