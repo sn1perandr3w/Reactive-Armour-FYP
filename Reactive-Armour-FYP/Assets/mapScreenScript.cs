@@ -24,5 +24,10 @@ public class mapScreenScript : MonoBehaviour {
 		SceneManager.LoadScene("town");
 	}
 
+    public void VR()
+    {
+        SceneManager.LoadScene("testRoom");
+    }
+
 
 }

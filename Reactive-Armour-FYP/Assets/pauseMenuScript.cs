@@ -20,7 +20,22 @@ public class pauseMenuScript : MonoBehaviour
     //Exits to map screen
     public void exitArea()
     {
+        Time.timeScale = 1;
         SceneManager.LoadScene("mapScreen");
+    }
+
+
+    public void vrReset()
+    {
+        GameObject persistenceController = GameObject.Find("PersistenceController");
+        Destroy(persistenceController);
+
+        
+
+        PlayerPrefs.SetString(SceneManager.GetActiveScene().name + "Persistence", "11");
+
+        Time.timeScale = 1;
+        SceneManager.LoadScene("testRoom");
     }
 
 

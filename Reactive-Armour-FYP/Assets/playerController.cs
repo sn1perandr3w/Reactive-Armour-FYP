@@ -375,7 +375,7 @@ public class playerController : MonoBehaviour
 
 		
 
-		if(Input.GetKey(KeyCode.Mouse0) && attackCooldown <= 0) {
+		if(Input.GetKey(KeyCode.Mouse0) && attackCooldown <= 0 && pausedGame == false) {
 			//print ("ATTACKING");
 			fireWeapon ();
 		}
