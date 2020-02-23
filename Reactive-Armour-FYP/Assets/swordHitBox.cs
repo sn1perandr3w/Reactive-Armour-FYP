@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class hitBox : MonoBehaviour
+public class swordHitBox : MonoBehaviour
 {
 
     public List<GameObject> enemiesToHit;

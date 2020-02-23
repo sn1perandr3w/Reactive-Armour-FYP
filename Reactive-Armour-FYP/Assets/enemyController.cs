@@ -83,6 +83,9 @@ public class enemyController : MonoBehaviour
 
     string triggerForReturn;
 
+    public bool grabbed = false;
+
+    public bool thrown = false;
 
 
     void Start ()
@@ -225,9 +228,13 @@ public class enemyController : MonoBehaviour
                 knockbackTime -= Time.deltaTime;
                 //print("KNOCKBACK TIME = " + timeUntilKnockbackEnds);
                 //knockbackForce = knockbackForce * knockbackTime;
+
+                
+
             }
             else
             {
+                thrown = false;
                 anim.SetTrigger(triggerForReturn);
             }
 
@@ -347,17 +354,24 @@ public class enemyController : MonoBehaviour
 
 	void CheckForCivTargets()
 	{
-		foreach (GameObject civTarget in civilians) {
-			if (civTarget != null) {
-				float enemyDistanceToCivTarget = Vector3.Distance (this.transform.position, civTarget.transform.position);
-				if (enemyDistanceToCivTarget <= 200.0f) {
-					target = civTarget.transform;
-                    anim.SetTrigger("combatCiv");
-                } 
-			} else if (civTarget == null) {
-				civilians.Remove (civTarget);
-			}
-		}
+        
+            foreach (GameObject civTarget in civilians)
+            {
+                if (civTarget != null)
+                {
+                    float enemyDistanceToCivTarget = Vector3.Distance(this.transform.position, civTarget.transform.position);
+                    if (enemyDistanceToCivTarget <= 200.0f)
+                    {
+                        target = civTarget.transform;
+                        anim.SetTrigger("combatCiv");
+                    }
+                }
+                else if (civTarget == null)
+                {
+                    civilians.Remove(civTarget);
+                }
+            }
+        
 	}
 
 
@@ -533,9 +547,36 @@ public class enemyController : MonoBehaviour
 		newSelection ();
 	}
 
-	//Moving once in combat range
+    //Moving once in combat range
 
-	public void combatMove ()
+
+
+    public void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        print("Collided with " + hit.gameObject.name);
+
+        if (thrown == true && hit.gameObject.tag != "player")
+        {
+            if (hit.gameObject.tag == "enemy")
+            {
+                hit.gameObject.GetComponent<enemyController>().initStun(2.0f);
+                hit.gameObject.GetComponent<enemyController>().lowerHealth(50);
+            }
+
+            else if (hit.gameObject.tag == "destructible")
+            {
+                hit.gameObject.GetComponent<destructible>().lowerHealth(50);
+            }
+
+            
+            anim.SetTrigger(triggerForReturn);
+            lowerHealth(50);
+            thrown = false;
+        }
+    }
+
+
+    public void combatMove ()
 	{
 		Turn ();
 
@@ -547,7 +588,7 @@ public class enemyController : MonoBehaviour
             anim.SetTrigger("pursue");
         }
 
-		print ("SELECTION = " + selection);
+		//print ("SELECTION = " + selection);
 		if (attackCooldown <= 0.0f) {
 			if (selection == 1 && distanceToPlayer <= 4.0f) {
 

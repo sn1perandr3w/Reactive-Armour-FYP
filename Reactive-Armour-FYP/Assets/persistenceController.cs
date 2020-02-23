@@ -26,19 +26,19 @@ public class persistenceController : MonoBehaviour
 
         for (int i = 0; i < persistentObjects.Count; i++)
         {
-            print("PERSISTENT STATE = " + persistenceState[i]);
-            print("INT OF PERSISTENT STATE = " + int.Parse(persistenceState[i].ToString()));
+            //print("PERSISTENT STATE = " + persistenceState[i]);
+            //print("INT OF PERSISTENT STATE = " + int.Parse(persistenceState[i].ToString()));
             objectState[i] = int.Parse(persistenceState[i].ToString());
         }
 
-        print("PERSISTENCE STATE = " + persistenceState);
+        //print("PERSISTENCE STATE = " + persistenceState);
 
         for (int i = 0; i < persistentObjects.Count; i++)
         {
-            print("OBJECT STATE = " + objectState[i]);
+            //print("OBJECT STATE = " + objectState[i]);
             if (objectState[i] == 0)
             {
-                print("DESTROYING " + i);
+                //print("DESTROYING " + i);
                 Destroy(persistentObjects[i]);
             }
         }

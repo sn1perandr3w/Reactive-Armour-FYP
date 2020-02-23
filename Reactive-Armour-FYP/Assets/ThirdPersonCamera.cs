@@ -18,7 +18,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public GameObject playerTarget;
 
-    private Camera cam;
+    public Camera cam;
 
     Quaternion rotation = Quaternion.Euler(0, 0, 0);
 
@@ -46,12 +46,13 @@ public class ThirdPersonCamera : MonoBehaviour
     public List<GameObject> interactables;
     public List<GameObject> interactablesInRange;
 
-    int lockOnSelection = 0;
+    public int lockOnSelection = 0;
 
     float keyDownTime = 0.0f;
 
     Vector3 dir;
     Vector3 tgtDir;
+    Vector3 tgtDir2;
 
     public float objxEuler;
     public float objyEuler;
@@ -64,18 +65,50 @@ public class ThirdPersonCamera : MonoBehaviour
 
     public bool pausedGame = false;
 
+    public GameObject enemyUILabel;
+    public GameObject enemyUIMarker;
+
+    public GameObject hud;
+
+    public List<GameObject> enemyLabels;
+    public List<GameObject> enemyMarkers;
+
+    public bool stopCamera = false;
+
+    public bool zoom = false;
+
+    public float zoomCooldown = 1.0f;
+
+    public GameObject sniperCrosshair;
+
     private void Start()
     {
         aimTarget = GameObject.FindGameObjectWithTag("aimTarget");
         player = GameObject.FindGameObjectWithTag("player").transform;
         camTransform = transform;
-        cam = Camera.main;
+        cam = this.GetComponent<Camera>();
         camTarget = aimTarget;
         playerTarget = aimTarget;
+
+        hud = GameObject.Find("HUD");
+
+        
 
         foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("enemy"))
         {
             enemies.Add(enemy);
+
+            GameObject enemyMarker = (GameObject)Instantiate(enemyUIMarker);
+            enemyMarker.transform.SetParent(hud.transform);
+
+            enemyMarkers.Add(enemyMarker);
+
+
+            GameObject enemyLabel = (GameObject)Instantiate(enemyUILabel);
+            enemyLabel.transform.SetParent(hud.transform);
+            enemyLabel.GetComponent<Text>().text = enemy.GetComponent<enemyController>().enemyName;
+            enemyLabels.Add(enemyLabel);
+
         }
 
 
@@ -98,8 +131,32 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         if (pausedGame == false)
         {
+
+            if (currentX > 360)
+            {
+                currentX -= 360;
+            }
+            else if (currentX <= 0)
+            {
+                currentX += 360;
+            }
+
+            //TOP LOOKING DOWN
+            if (player.transform.eulerAngles.x >= 0 && player.transform.eulerAngles.x <= 70 && lockedOn)
+            {
+                currentY = (player.transform.eulerAngles.x);
+            }
+            else //BOTTOM LOOKING UP
+            if (player.transform.eulerAngles.x <= 360 && player.transform.eulerAngles.x > 280 && lockedOn)
+            {
+                currentY = -(360 - player.transform.eulerAngles.x);
+            }
+
+
+
             dir = new Vector3(0, 2, -distance);
             tgtDir = new Vector3(0, -10, -distance * 10);
+            tgtDir2  = new Vector3(0, 0, -distance * 10);
 
             if (enemies.Count > 0)
             {
@@ -107,11 +164,13 @@ public class ThirdPersonCamera : MonoBehaviour
                 {
                     if (enemy != null)
                     {
+
+
                         float enemyDistanceToPlayer = Vector3.Distance(player.transform.position, enemy.transform.position);
-                        if (enemyDistanceToPlayer <= 100.0f && !enemiesInLockOnRange.Contains(enemy))
+                        if (enemyDistanceToPlayer <= 100.0f && !enemiesInLockOnRange.Contains(enemy) && enemy.GetComponent<enemyController>().grabbed == false)
                         {
                             enemiesInLockOnRange.Add(enemy);
-                            if (initialLockOn == true)
+                            if (initialLockOn == true && zoom == false)
                             {
                                 camTarget = enemiesInLockOnRange[0];
                                 playerTarget = enemiesInLockOnRange[0];
@@ -125,11 +184,55 @@ public class ThirdPersonCamera : MonoBehaviour
                     }
                     else if (enemy == null)
                     {
+                        Destroy(enemyMarkers[enemies.IndexOf(enemy)]);
+                        enemyMarkers.RemoveAt(enemies.IndexOf(enemy));
+
+                        Destroy(enemyLabels[enemies.IndexOf(enemy)]);
+                        enemyLabels.RemoveAt(enemies.IndexOf(enemy));
+
                         enemies.Remove(enemy);
                         enemiesInLockOnRange.Remove(enemy);
+                        
                     }
                 }
+
+
+                for (int i = 0; i < enemyMarkers.Count; i++)
+                {
+                    Vector3 enemyMarkerPos = this.GetComponent<Camera>().WorldToScreenPoint(enemies[i].transform.position + (transform.up * 1.0f));
+                    Vector3 enemyLabelPos = enemyMarkerPos + (transform.up * 32.0f);
+                    enemyMarkers[i].transform.position = enemyMarkerPos;
+                    enemyLabels[i].transform.position = enemyLabelPos;
+
+                    
+
+                    if (enemiesInLockOnRange.Contains(enemies[i]) && enemies[i] != playerTarget)
+                    {
+                        //print("UI CHECK 1");
+                        enemyMarkers[i].GetComponent<RawImage>().color = new Color32(255, 153, 0, 255);
+                        enemyLabels[i].GetComponent<Text>().color = new Color32(255, 153, 0, 255);
+                    }
+
+                    
+                    else if (enemies[i] == playerTarget)
+                    {
+                        //print("UI CHECK 2");
+                        enemyMarkers[i].GetComponent<RawImage>().color = new Color32(255, 0, 12, 255);
+                        enemyLabels[i].GetComponent<Text>().color = new Color32(255, 0, 12, 255);
+                    }
+
+                    else
+                    {
+                        //print("UI CHECK 3");
+                        enemyMarkers[i].GetComponent<RawImage>().color = new Color32(0, 255, 138, 255);
+                        enemyLabels[i].GetComponent<Text>().color = new Color32(0, 255, 138, 255);
+                    }
+                    
+                }
             }
+
+            
+            
 
 
             if (!interactables.Equals(0))
@@ -174,50 +277,61 @@ public class ThirdPersonCamera : MonoBehaviour
         }
 
 
-        if (Input.GetKey(KeyCode.Q) && lockedOn == true)
+            if (Input.GetKey(KeyCode.F) && lockedOn == false && zoomCooldown <= 0.0f)
+            {
+                if (zoom == false)
+                {
+                    cam.fieldOfView = 10;
+                    sniperCrosshair.SetActive(true);
+                    sensitivityX = 12.0f;
+                    sensitivityY = 12.0f;
+                    zoom = true;
+                }
+                else
+                {
+                    cam.fieldOfView = 60;
+                    sniperCrosshair.SetActive(false);
+                    sensitivityX = 48.0f;
+                    sensitivityY = 48.0f;
+                    zoom = false;
+                }
+                zoomCooldown = 1.0f;
+            }
+
+
+            if (Input.GetKey(KeyCode.Q) && lockedOn == true)
         {
 
             keyDownTime += Time.deltaTime;
 
-            if (keyDownTime >= 1.0f)
+            if (keyDownTime >= 1.0f || playerTarget == null && enemiesInLockOnRange.Count == 0)
             {
-                if (this.transform.eulerAngles.x > 281)
-                {
-                    currentY = this.transform.eulerAngles.x - 360;
-                }
-                else
-                {
-                    currentY = this.transform.eulerAngles.x;
-                }
-                currentX = this.transform.eulerAngles.y;
-
-
-                camTarget = aimTarget;
-                playerTarget = aimTarget;
-                lockedOn = false;
-                camLockedCombat = false;
-                keyDownTime = 0;
+                    resetCamera();
             }
         }
 
-
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if (enemiesInLockOnRange.Count > 0)
+            if (Input.GetKeyUp(KeyCode.Q))
             {
-                camTarget = enemiesInLockOnRange[lockOnSelection];
-                playerTarget = enemiesInLockOnRange[lockOnSelection];
-                if ((lockOnSelection + 1) != enemiesInLockOnRange.Count)
-                {
-                    lockOnSelection++;
-                }
-                else
-                {
-                    lockOnSelection = 0;
-                }
-                keyDownTime = 0.0f;
+                keyDownTime = 0;
             }
+
+        if (Input.GetKeyDown(KeyCode.E) && zoom == false)
+        {
+                if (enemiesInLockOnRange.Count > 0)
+                {
+                    camTarget = enemiesInLockOnRange[lockOnSelection];
+                    playerTarget = enemiesInLockOnRange[lockOnSelection];
+                    if ((lockOnSelection + 1) != enemiesInLockOnRange.Count)
+                    {
+                        lockOnSelection++;
+                    }
+                    else
+                    {
+                        lockOnSelection = 0;
+                    }
+                    keyDownTime = 0.0f;
+                }
+                
         }
 
 
@@ -232,10 +346,26 @@ public class ThirdPersonCamera : MonoBehaviour
             distanceBetweenPlayerandTarget = Vector3.Distance(player.transform.position, playerTarget.transform.position);
             playerTargetPos = playerTarget.transform.position;
         }
-        //print ("DISTANCE FROM PLAYER TO TARGET = " + distanceBetweenPlayerandTarget);
+            //print ("DISTANCE FROM PLAYER TO TARGET = " + distanceBetweenPlayerandTarget);
 
+            
+            //print("CURRENT X = " + currentX);
+            //print("Current Euler X = " + player.transform.eulerAngles.y);
+            //print("CURRENT Y = " + currentY);
+            //print("Current Euler Y = " + (player.transform.eulerAngles.x));
+            
+            /*
+            if (currentY >= 0)
+            {
+                print("Current Euler Y = " + ( player.transform.eulerAngles.x));
+            }
+            else
+            {
+            print("Current Euler Y = " + (-(360 - player.transform.eulerAngles.x)));
+            }
+            */
 
-        if (lockedOn == false)
+            if (lockedOn == false && stopCamera == false)
         {
             currentX += Input.GetAxis("Mouse X");
             currentY -= Input.GetAxis("Mouse Y");
@@ -252,7 +382,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
         if (camTarget == null || playerTarget == null)
         {
-
+            /*
             if (this.transform.eulerAngles.x > 281)
             {
                 currentY = this.transform.eulerAngles.x - 360;
@@ -262,7 +392,7 @@ public class ThirdPersonCamera : MonoBehaviour
                 currentY = this.transform.eulerAngles.x;
             }
             currentX = this.transform.eulerAngles.y;
-
+            */
             if (enemiesInLockOnRange.Count.Equals(0))
             {
                 camTarget = aimTarget;
@@ -270,6 +400,8 @@ public class ThirdPersonCamera : MonoBehaviour
                 lockedOn = false;
                 camLockedCombat = false;
                 lockOnSelection = 0;
+
+                    resetCamera();
             }
             else
             {
@@ -288,6 +420,14 @@ public class ThirdPersonCamera : MonoBehaviour
             camLockedCombat = false;
         }
         }
+
+
+        if (zoomCooldown > 0.0f)
+        {
+            zoomCooldown -= Time.deltaTime;
+        }
+
+
     }
 
 
@@ -322,31 +462,55 @@ public class ThirdPersonCamera : MonoBehaviour
                     {
                         midpointPos = (player.transform.position + playerTarget.transform.position) * 0.5f;
 
+
+
+
+                        if (initCloseCam == true)
+                        {
+                            camRelative = midpointPos - camTransform.position;
+                            //print ("MID = " + midpointPos + "CAM = " + camTransform.position + "RELATIVE = " + camRelative);
+                            initCloseCam = false;
+                        }
+
+                        var smoothRotation = Quaternion.LookRotation(midpointPos - camTransform.position);
+
+                        camTransform.rotation = Quaternion.Slerp(camTransform.rotation, smoothRotation, Time.deltaTime * sensitivityX / 4);
+                        camTransform.position = Vector3.Slerp(camTransform.position, (midpointPos - camRelative), 0.7f);
+
+                        //camTransform.rotation = smoothRotation;
+                        //camTransform.position = midpointPos - camRelative;
+
+                        camResetCooldown = 2.0f;
+
+                        
+
+                        aimTarget.transform.position = player.position - rotation * tgtDir2;
+                        //aimTarget.transform.position = player.position - rotation * tgtDir;
+
                     }
 
-                    if (initCloseCam == true)
+                    else
                     {
-                        camRelative = midpointPos - camTransform.position;
-                        //print ("MID = " + midpointPos + "CAM = " + camTransform.position + "RELATIVE = " + camRelative);
-                        initCloseCam = false;
+                        resetCamera();
                     }
-
-                    var smoothRotation = Quaternion.LookRotation(midpointPos - camTransform.position);
-                    camTransform.rotation = Quaternion.Slerp(camTransform.rotation, smoothRotation, Time.deltaTime * sensitivityX / 4);
-                    camTransform.position = Vector3.Slerp(camTransform.position, (midpointPos - camRelative), 0.7f);
-                    camResetCooldown = 2.0f;
 
 
                 }
-                else if (camLockedCombat == false && camTarget != null)
+                else if (camLockedCombat == false && camTarget != null )
                 {
                     initCloseCam = true;
                     var smoothRotation = Quaternion.LookRotation(camTarget.transform.position - camTransform.position);
+
                     camTransform.rotation = Quaternion.Slerp(camTransform.rotation, smoothRotation, Time.deltaTime * sensitivityX);
                     camTransform.position = Vector3.Slerp(camTransform.position, player.position + rotation * dir, 0.7f);
+
+                    //camTransform.rotation = smoothRotation;
+                    //camTransform.position = player.position + rotation * dir;
+
+                    aimTarget.transform.position = player.position - rotation * tgtDir2; 
                 }
 
-                aimTarget.transform.position = player.position - rotation * tgtDir;
+                
 
 
                 player.LookAt(playerTargetPos);
@@ -362,6 +526,120 @@ public class ThirdPersonCamera : MonoBehaviour
                 GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy: NONE";
             }
         }
+    }
+
+    public void grabCameraReset()
+    {
+        if (enemiesInLockOnRange.Count > 0)
+        {
+            
+            
+            if ((lockOnSelection + 1) < enemiesInLockOnRange.Count)
+            {
+                lockOnSelection++;
+            }
+            else
+            {
+                lockOnSelection = 0;
+            }
+
+            camTarget = enemiesInLockOnRange[lockOnSelection];
+            playerTarget = enemiesInLockOnRange[lockOnSelection];
+
+            keyDownTime = 0.0f;
+            
+
+            
+        }
+
+        else
+        {
+            resetCamera();
+        }
+    }
+
+    public void throwCameraReset()
+    {
+        /*
+        if (enemiesInLockOnRange.Count > 0)
+        {
+            camTarget = enemiesInLockOnRange[lockOnSelection];
+            playerTarget = enemiesInLockOnRange[lockOnSelection];
+            if ((lockOnSelection + 1) != enemiesInLockOnRange.Count)
+            {
+                lockOnSelection++;
+            }
+            else
+            {
+                lockOnSelection = 0;
+            }
+            keyDownTime = 0.0f;
+        }
+
+        else
+        {
+            resetCamera();
+        }
+        */
+
+        if (enemiesInLockOnRange.Count == 1)
+        {
+            lockedOn = true;
+            //camTarget = enemiesInLockOnRange[0];
+            playerTarget = enemiesInLockOnRange[0];
+            lockOnSelection = 0;
+        }
+
+        for (int i = 0; i < enemyMarkers.Count; i++)
+        {
+            Vector3 enemyMarkerPos = this.GetComponent<Camera>().WorldToScreenPoint(enemies[i].transform.position + (transform.up * 1.0f));
+            Vector3 enemyLabelPos = enemyMarkerPos + (transform.up * 32.0f);
+            enemyMarkers[i].transform.position = enemyMarkerPos;
+            enemyLabels[i].transform.position = enemyLabelPos;
+
+
+
+        }
+
+    }
+
+    public void resetCamera()
+    {
+        //aimTarget.transform.position = player.position - rotation * tgtDir;
+
+        
+
+        aimTarget.transform.position = player.position - rotation * tgtDir2;
+
+        print("CURRENT X = " + currentX);
+        print("Current Euler X = " + player.transform.eulerAngles.y);
+        print("CURRENT Y = " + currentY);
+
+        if (currentY >= 0)
+        {
+            print("Current Euler Y = " + (player.transform.eulerAngles.x));
+        }
+        else
+        {
+            print("Current Euler Y = " + (-(360 + player.transform.eulerAngles.x)));
+        }
+
+
+        currentX = player.transform.eulerAngles.y;
+
+
+
+
+
+        camTarget = aimTarget;
+        playerTarget = aimTarget;
+        lockedOn = false;
+        camLockedCombat = false;
+
+        //camTransform.rotation = Quaternion.Euler(camTarget.transform.position - aimTarget.transform.position);
+        //camTransform.position = player.position + dir;
+
+        keyDownTime = 0;
     }
 
 }

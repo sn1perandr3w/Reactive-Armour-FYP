@@ -20,6 +20,11 @@ public class playerController : MonoBehaviour
 	CharacterController cc;
 	public int healthLimit;
 	int health;
+
+    public int shieldHealth;
+    public float shieldRechargeDelay = 0.0f;
+
+
 	public int ammoLimit;
 	int ammo;
 	int civSaved;
@@ -34,7 +39,7 @@ public class playerController : MonoBehaviour
 	private string [] weaponList;
 	private int weaponSelect;
 
-	float attackCooldown = 0.0f;
+	public float attackCooldown = 0.0f;
 
 	int experience;
 	int level;
@@ -44,6 +49,7 @@ public class playerController : MonoBehaviour
 	public bool guarding = false;
 
     public GameObject swordHitbox;
+    
 
     int comboHit = 0;
 
@@ -60,10 +66,48 @@ public class playerController : MonoBehaviour
 
     public GameObject playerCamera;
 
+
+    public GameObject clusterBomb;
+
+    public GameObject missile;
+    public GameObject emptyTarget;
+
+
+    public GameObject mine;
+
+    public GameObject plasmaLanceHitbox;
+
+    public float attackKeyDownTime = 0.0f;
+
+    public float plasmaLanceOverheatTime = 0.0f;
+
+    public Renderer plasmaLanceRenderer;
+
+    public Renderer shieldRenderer;
+
+    public GameObject sniperShell;
+
+    int plasmaLanceMultiplier = 1;
+
+    public bool grabHeld = false;
+
+    public GameObject grabTarget;
+
+
+    public GameObject [] clusterBombs;
+    public List<Vector3> clusterBombPositions;
+    public bool clusterBombsDeployed = false;
+
     void Start()
 	{
         swordHitbox = this.gameObject.transform.GetChild(2).gameObject;
+        plasmaLanceHitbox = this.gameObject.transform.GetChild(3).gameObject;
 
+        plasmaLanceRenderer = plasmaLanceHitbox.GetComponent<Renderer>();
+
+        shieldRenderer = this.gameObject.transform.GetChild(4).gameObject.GetComponent<Renderer>();
+
+        clusterBombs = new GameObject[8];
 
         cc = this.GetComponent<CharacterController>();
 
@@ -77,6 +121,7 @@ public class playerController : MonoBehaviour
 
 		healthLimit = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
 		health = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
+        shieldHealth = 100;
 		ammoLimit = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
 		ammo = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
 
@@ -88,13 +133,32 @@ public class playerController : MonoBehaviour
 		civSaved = PlayerPrefs.GetInt("civSaved");
 		
 
+
+
 		weaponSelect = 0;
-		weaponList = new string[2];
+		weaponList = new string[7];
 		weaponList [0] = "Sword";
 		weaponList [1] = "Sniper Rifle";
+        weaponList [2] = "Grab";
+        weaponList [3] = "Mine";
+        weaponList [4] = "Missile";
+        weaponList [5] = "Cluster Bomb";
+        weaponList [6] = "Plasma Lance";
 
 
-		if (experience < 500) {
+        clusterBombPositions.Add(transform.forward * 2.0f);
+        clusterBombPositions.Add(transform.forward * -2.0f);
+        clusterBombPositions.Add((transform.forward * 1.5f) + (transform.right * 1.5f));
+        clusterBombPositions.Add((transform.forward * -1.5f) + (transform.right * 1.5f));
+        clusterBombPositions.Add((transform.forward * 1.5f) + (transform.right * -1.5f));
+        clusterBombPositions.Add((transform.forward * -1.5f) + (transform.right * -1.5f));
+        clusterBombPositions.Add(transform.right * 2.0f);
+        clusterBombPositions.Add(transform.right * -2.0f);
+
+       
+
+
+        if (experience < 500) {
 			level = 1;
 		} else if (experience >+ 500 && experience < 1000) 
 		{
@@ -124,13 +188,14 @@ public class playerController : MonoBehaviour
 
 
             GameObject.Find("UIHealth").GetComponent<Text>().text = "Health: " + health + "%";
+            GameObject.Find("UIShield").GetComponent<Text>().text = "Shield: " + shieldHealth + "%";
             GameObject.Find("UIWeapon").GetComponent<Text>().text = "Subweapon:" + weaponList[weaponSelect];
             GameObject.Find("UIAmmo").GetComponent<Text>().text = "Subweapon Ammo: " + ammo;
             GameObject.Find("UIObjective").GetComponent<Text>().text = "Objective:";
             GameObject.Find("UIObjective2").GetComponent<Text>().text = objective;
             GameObject.Find("UITotalCivs").GetComponent<Text>().text = "Total Saved: " + civSaved;
             GameObject.Find("UILevel").GetComponent<Text>().text = "Level: " + level;
-
+            GameObject.Find("UIOverheat").GetComponent<Text>().text = (plasmaLanceOverheatTime/6.0f * 100/1).ToString("F0") + "%";
             Debug.DrawRay(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, Color.red);
 
 
@@ -138,6 +203,14 @@ public class playerController : MonoBehaviour
             {
                 attackCooldown -= Time.deltaTime;
             }
+
+            if (plasmaLanceOverheatTime > 0.0f && !Input.GetKey(KeyCode.Mouse0) || plasmaLanceOverheatTime > 0.0f && attackCooldown > 0.0f)
+            {
+                plasmaLanceOverheatTime -= Time.deltaTime;
+            }
+
+
+
 
             if (comboHit > 3)
             {
@@ -165,6 +238,14 @@ public class playerController : MonoBehaviour
                 }
 
             }
+
+            if (shieldRechargeDelay <= 0.0f && shieldHealth < 100 && guarding == false)
+            {
+                shieldHealth++;
+            }
+
+            
+
         }
     }
 
@@ -238,50 +319,90 @@ public class playerController : MonoBehaviour
 
 	public void lowerHealth(int amount)
 	{
-		if (guarding == false) {
-			health = health - amount;
-			combatEffectiveness -= 25;
+        if (guarding == false)
+        {
+            health = health - amount;
+            combatEffectiveness -= 25;
 
-			if (health < 40) {
-				audiosource2.Play ();
-			}
+            if (health < 40)
+            {
+                audiosource2.Play();
+            }
 
 
-			if (health <= 0) {
-				combatEffectiveness -= 100;
-				if (combatEffectiveness < 0) {
-					combatEffectiveness = 0;
-				}
-				PlayerPrefs.SetInt ("combatEffectiveness", combatEffectiveness);
-				PlayerPrefs.SetString ("scene", SceneManager.GetActiveScene().name);
-				SceneManager.LoadScene ("gameOverScreen");
+            if (health <= 0)
+            {
+                combatEffectiveness -= 100;
+                if (combatEffectiveness < 0)
+                {
+                    combatEffectiveness = 0;
+                }
+                PlayerPrefs.SetInt("combatEffectiveness", combatEffectiveness);
+                PlayerPrefs.SetString("scene", SceneManager.GetActiveScene().name);
+                SceneManager.LoadScene("gameOverScreen");
 
-			}
+            }
 
-			if (combatEffectiveness < 0) {
-				combatEffectiveness = 0;
-			}
-			print ("Player: " + gameObject.name + " health = " + health);
-		}
-	}
+            if (combatEffectiveness < 0)
+            {
+                combatEffectiveness = 0;
+            }
+            print("Player: " + gameObject.name + " health = " + health);
+
+            
+        }
+        else
+        {
+            shieldHealth -= amount;
+
+            if (shieldHealth < 0)
+            {
+                shieldHealth = 0;
+            }
+        }
+
+        shieldRechargeDelay = 4.5f;
+    }
 
 
 	public void guard()
 	{
-		guarding = true;
+        if (shieldHealth > 0.0)
+        {
+            guarding = true;
+        }
+        else
+        {
+            guarding = false;
+        }
 	}
 
 	public void fireWeapon()
 	{
 
-		if (weaponSelect == 0 && attackCooldown <= 0.0f) {
+        /*
+        weaponList [0] = "Sword";
+		weaponList [1] = "Sniper Rifle";
+        weaponList [2] = "Grab";
+        weaponList [3] = "Mine";
+        weaponList [4] = "Missile";
+        weaponList [5] = "Cluster Bomb";
+        weaponList [6] = "Plasma Lance";
+          
+          
+         */
+
+
+        //Sword
+        if (weaponSelect == 0 && attackCooldown <= 0.0f)
+        {
             lunging = true;
             lungeTime = 0.2f;
             comboHit++;
-            swordHitbox.GetComponent<hitBox>().hitboxActive(1,2.0f,0.25f,25, comboHit);
+            swordHitbox.GetComponent<swordHitBox>().hitboxActive(1, 2.0f, 0.25f, 25, comboHit);
             attackCooldown = 0.4f;
 
-            
+
             comboTimer = 1.0f;
             print("COMBOHIT = " + comboHit);
 
@@ -306,28 +427,191 @@ public class playerController : MonoBehaviour
 				}
 				attackCooldown = 0.33f;
             */
-		}
+        }
         else
-		if (weaponSelect == 1) {
-			if (ammo >= 10) {
-				if (Physics.Raycast (transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, out hit)) {
-					print ("Player Hit: " + hit.transform.gameObject);
-					if (hit.transform.gameObject.tag == "destructible" && attackCooldown <= 0.0f) {
-						print ("SHOULD BE LOWERING HEALTH");
-						hit.transform.gameObject.GetComponent<destructible> ().lowerHealth (100);
-					}
-					else
-						if (hit.transform.gameObject.tag == "enemy" && hit.transform.gameObject.GetComponent<enemyController> ().guarding == false && attackCooldown <= 0.0f) {
-						print ("SHOULD BE LOWERING HEALTH");
-							hit.transform.gameObject.GetComponent<enemyController> ().lowerHealth (Mathf.RoundToInt(50 * damageMultiplier));
-					}
-				}
-				audiosource.PlayOneShot (sniperShot, 1.0f);
-				attackCooldown = 2.0f;
-				ammo -= 10;
-			}
-		}
-	}
+        //Sniper Rifle
+        if (weaponSelect == 1 && attackCooldown <= 0.0f)
+        {
+            if (ammo >= 10)
+            {
+                if (Physics.Raycast(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, out hit))
+                {
+                    print("Player Hit: " + hit.transform.gameObject);
+                    if (hit.transform.gameObject.tag == "destructible" && attackCooldown <= 0.0f)
+                    {
+                        print("SHOULD BE LOWERING HEALTH");
+                        hit.transform.gameObject.GetComponent<destructible>().lowerHealth(100);
+                    }
+                    else
+                        if (hit.transform.gameObject.tag == "enemy" && hit.transform.gameObject.GetComponent<enemyController>().guarding == false && attackCooldown <= 0.0f)
+                    {
+                        print("SHOULD BE LOWERING HEALTH");
+                        hit.transform.gameObject.GetComponent<enemyController>().lowerHealth(Mathf.RoundToInt(50 * damageMultiplier));
+                    }
+                }
+
+                Vector3 xyz = new Vector3(transform.eulerAngles.x - 90, transform.eulerAngles.y, transform.eulerAngles.z);
+                Quaternion newRotation = Quaternion.Euler(xyz);
+
+                GameObject g = (GameObject)Instantiate(sniperShell, transform.position + transform.right * 0.7f, newRotation);
+                g.GetComponent<Rigidbody>().AddForce(transform.up * 250 + transform.right * 50);
+                g.GetComponent<Rigidbody>().AddTorque(transform.right * -5);
+                Destroy(g, 5);
+
+                audiosource.PlayOneShot(sniperShot, 1.0f);
+                attackCooldown = 2.0f;
+                ammo -= 10;
+            }
+        }
+        else
+        //Grab
+            if (weaponSelect == 2 && attackCooldown <= 0.0f)
+        {
+            //print("GRAB");
+
+            if (grabTarget != null && grabHeld == true)
+            {
+                grabTarget.transform.position = transform.position + (transform.forward * 1.5f);
+                grabTarget.GetComponent<enemyController>().initStun(0.5f);
+                //playerCamera.GetComponent<ThirdPersonCamera>().grabCameraReset();
+                //grabHeld = true;
+            }
+            else if (playerCamera.GetComponent<ThirdPersonCamera>().playerTarget != null && playerCamera.GetComponent<ThirdPersonCamera>().playerTarget.tag == "enemy" && grabHeld == false)
+            {
+                grabTarget = playerCamera.GetComponent<ThirdPersonCamera>().playerTarget;
+                playerCamera.GetComponent<ThirdPersonCamera>().enemiesInLockOnRange.Remove(grabTarget);
+                playerCamera.GetComponent<ThirdPersonCamera>().grabCameraReset();
+                grabHeld = true;
+            }
+        }
+
+        else
+        //Mine
+            if (weaponSelect == 3 && attackCooldown <= 0.0f)
+        {
+            //Vector3 minePosition = transform.position + (transform.forward * -1.0f);
+
+            Vector3 xyz = new Vector3(transform.eulerAngles.x - 90, transform.eulerAngles.y, transform.eulerAngles.z);
+            Quaternion newRotation = Quaternion.Euler(xyz);
+
+
+            GameObject g = (GameObject)Instantiate(mine, (transform.position + (transform.forward * -1.0f)), newRotation);
+
+            g.name = "Mine";
+
+
+            attackCooldown = 6.0f;
+        }
+
+        else
+        //Missile
+            if (weaponSelect == 4 && attackCooldown <= 0.0f)
+        {
+
+            //Vector3 missilePosition = transform.position + (transform.forward * -1.0f) + (transform.right * -0.5f);
+
+            Vector3 xyz = new Vector3(transform.eulerAngles.x - 90, transform.eulerAngles.y, transform.eulerAngles.z);
+            Quaternion newRotation = Quaternion.Euler(xyz);
+
+            for (int i = 0; i < 5; i++)
+            {
+
+                //GameObject g = (GameObject)Instantiate(missile, missilePosition, newRotation);
+                //GameObject g = (GameObject)Instantiate(missile, missilePosition, Quaternion.identity);
+
+
+                GameObject g = (GameObject)Instantiate(missile, (transform.position + (transform.forward * -1.0f) + (transform.right * (-0.5f + (0.25f * (i + 1))))), newRotation);
+
+                g.name = "Missile" + (i + 1);
+
+                g.GetComponent<MissileController>().missileNo = i;
+                g.GetComponent<MissileController>().setLaunchTimer();
+
+
+                if (playerCamera.GetComponent<ThirdPersonCamera>().playerTarget.tag == "enemy")
+                {
+                    g.GetComponent<MissileController>().target = playerCamera.GetComponent<ThirdPersonCamera>().playerTarget;
+                }
+                else
+
+
+                if (Physics.Raycast(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, out hit))
+                {
+                    GameObject h = (GameObject)Instantiate(emptyTarget, hit.point, Quaternion.identity);
+                    h.name = "HitTarget";
+                    g.GetComponent<MissileController>().target = h;
+                }
+
+                else
+
+                {
+                    GameObject h = (GameObject)Instantiate(emptyTarget, transform.position + (transform.forward * 120.0f), Quaternion.identity);
+                    h.name = "BlindTarget";
+                    g.GetComponent<MissileController>().target = h;
+                }
+
+
+                //missilePosition = transform.position + (transform.forward * -1.0f) + (transform.right * (-0.5f + (0.25f * (i+1))));
+
+
+            }
+
+            attackCooldown = 6.0f;
+        }
+
+        else
+        //Cluster Bomb
+            if (weaponSelect == 5 && attackCooldown <= 0.0f && clusterBombsDeployed == false)
+        {
+
+
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject g = (GameObject)Instantiate(clusterBomb, transform.position + (clusterBombPositions[i]), Quaternion.identity);
+                g.name = "Cluster Bomb " + i;
+                g.GetComponent<clusterBombScript>().offsetPosition = clusterBombPositions[i];
+                g.GetComponent<clusterBombScript>().player = this.gameObject;
+
+                clusterBombs[i] = g;
+            }
+
+            attackCooldown = 6.0f;
+
+
+
+            print("CLUSTER BOMB");
+            clusterBombsDeployed = true;
+        }
+
+        else
+        //Plasma Lance
+            if (weaponSelect == 6 && attackCooldown <= 0.0f)
+        {
+            plasmaLanceOverheatTime += Time.deltaTime;
+            print("PLASMA LANCE");
+
+            if (attackKeyDownTime > 2.0f)
+            {
+                plasmaLanceMultiplier = 2;
+            }
+
+
+            if (plasmaLanceOverheatTime > 6.0f)
+            {
+                plasmaLanceRenderer.enabled = false;
+                attackCooldown = 10.0f;
+                plasmaLanceHitbox.GetComponent<PlasmaLanceHitBox>().hitboxInactive();
+
+            }
+            else
+            {
+                plasmaLanceRenderer.enabled = true;
+
+                plasmaLanceHitbox.GetComponent<PlasmaLanceHitBox>().hitboxActive(1, 0.5f, 10 * plasmaLanceMultiplier, 2);
+            }
+        }
+
+    }
 
 	void OnControllerColliderHit(ControllerColliderHit col)
 	{
@@ -376,13 +660,63 @@ public class playerController : MonoBehaviour
 		
 
 		if(Input.GetKey(KeyCode.Mouse0) && attackCooldown <= 0 && pausedGame == false) {
-			//print ("ATTACKING");
+			//print ("ATTACKING Click");
+            attackKeyDownTime += Time.deltaTime;
 			fireWeapon ();
 		}
 
-		if (Input.GetKey (KeyCode.Mouse1)) {
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            attackKeyDownTime = 0.0f;
+
+            if (weaponSelect == 6 && attackCooldown <= 0.0f)
+            {
+                plasmaLanceMultiplier = 1;
+                plasmaLanceHitbox.GetComponent<PlasmaLanceHitBox>().hitboxInactive();
+                plasmaLanceRenderer.enabled = false;
+                attackCooldown = 2.0f;
+                
+            }
+
+            if (weaponSelect == 2 && grabTarget != null)
+            {
+                grabTarget.transform.position = transform.position + (transform.forward * 3.0f);
+                grabTarget.GetComponent<enemyController>().initKnockBack(transform, 0.6f, 80.0f);
+                // playerCamera.GetComponent<ThirdPersonCamera>().enemiesInLockOnRange.Add(grabTarget);
+                grabTarget.GetComponent<enemyController>().grabbed = false;
+                grabTarget.GetComponent<enemyController>().thrown = true;
+                grabTarget = null;
+                
+                grabHeld = false;
+                playerCamera.GetComponent<ThirdPersonCamera>().throwCameraReset();
+            }
+
+            if (weaponSelect == 5 && clusterBombsDeployed)
+            {
+                for (int i = 0; i < clusterBombs.Length; i++)
+                {
+                    if(clusterBombs[i] != null)
+                    clusterBombs[i].GetComponent<clusterBombScript>().explode();
+                }
+
+                clusterBombsDeployed = false;
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Mouse1))
+        {
+            shieldRenderer.enabled = false;
+        }
+
+        if (Input.GetKey (KeyCode.Mouse1)) {
 			print ("GUARDING");
 			guard ();
+
+            if (guarding == true)
+            {
+                shieldRenderer.enabled = true;
+            }
+            
 		} else 
 		{
 			guarding = false;
@@ -483,5 +817,14 @@ public class playerController : MonoBehaviour
 		cc.Move (transform.TransformDirection(movement));
 
 
-	}
+        if (clusterBombsDeployed == true)
+        {
+            for (int i = 0; i < clusterBombs.Length; i++)
+            {
+                if (clusterBombs[i] != null)
+                    clusterBombs[i].transform.position = transform.position + clusterBombs[i].GetComponent<clusterBombScript>().offsetPosition;
+            }
+        }
+
+    }
 }
