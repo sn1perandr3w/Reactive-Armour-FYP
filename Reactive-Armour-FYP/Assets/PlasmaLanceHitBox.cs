@@ -42,14 +42,36 @@ public class PlasmaLanceHitBox : MonoBehaviour
                         if (damageLevel == 2)
                         {
                             //print("KNOCKBACK FROM HITBOX");
+                            if(enemiesToHit[i].GetComponent<enemyController>() != null)
                             enemiesToHit[i].GetComponent<enemyController>().initKnockBack(transform.parent, 1.0f, 40.0f);
+                            else  if (enemiesToHit[i].GetComponent<EnemyMedicController>() != null)
+                                enemiesToHit[i].GetComponent<EnemyMedicController>().initKnockBack(transform.parent, 1.0f, 40.0f);
+                            else if (enemiesToHit[i].GetComponent<EnemySniperController>() != null)
+                                enemiesToHit[i].GetComponent<EnemySniperController>().initKnockBack(transform.parent, 1.0f, 40.0f);
                         }
                         else
                         {
-                            //print("STUN FROM HITBOX");
-                            enemiesToHit[i].GetComponent<enemyController>().initStun(0.2f);
+                            
+
+                            if (enemiesToHit[i].GetComponent<enemyController>() != null)
+                                enemiesToHit[i].GetComponent<enemyController>().initStun(0.2f);
+                            else if (enemiesToHit[i].GetComponent<EnemyMedicController>() != null)
+                                enemiesToHit[i].GetComponent<EnemyMedicController>().initStun(0.2f);
+                            else if (enemiesToHit[i].GetComponent<EnemySniperController>() != null)
+                                enemiesToHit[i].GetComponent<EnemySniperController>().initStun(0.2f);
                         }
-                        enemiesToHit[i].GetComponent<enemyController>().lowerHealth(damage);
+
+
+                        if (enemiesToHit[i].GetComponent<enemyController>() != null)
+                            enemiesToHit[i].GetComponent<enemyController>().lowerHealth(damage);
+
+                        if (enemiesToHit[i].GetComponent<EnemyMedicController>() != null)
+                            enemiesToHit[i].GetComponent<EnemyMedicController>().lowerHealth(damage);
+
+                        if (enemiesToHit[i].GetComponent<EnemySniperController>() != null)
+                            enemiesToHit[i].GetComponent<EnemySniperController>().lowerHealth(damage);
+
+
                         enemyInvincibility[i] = 0.5f;
                     }
                     else if (enemiesToHit[i] == null)

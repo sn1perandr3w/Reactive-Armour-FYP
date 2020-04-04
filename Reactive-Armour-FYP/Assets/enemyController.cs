@@ -17,7 +17,7 @@ public class enemyController : MonoBehaviour
 
 	float rotationalDamp = 60.0f;
 
-	float movementSpeed = 10.0f;
+	float movementSpeed = 4.0f;
 	public CharacterController cc;
 
 	public List<GameObject> civilians;
@@ -81,12 +81,14 @@ public class enemyController : MonoBehaviour
     public float knockbackTime;
     public float knockbackForce;
 
-    string triggerForReturn;
+    public string triggerForReturn;
 
     public bool grabbed = false;
 
     public bool thrown = false;
 
+    int strafeDirFB;
+    int strafeDirLR;
 
     void Start ()
 	{
@@ -127,7 +129,15 @@ public class enemyController : MonoBehaviour
 			}
 		}
 
-	}
+        foreach (GameObject civTarget in GameObject.FindGameObjectsWithTag("ally"))
+        {
+            if (civTarget.GetComponent<civEntity>() != null)
+            {
+                civilians.Add(civTarget);
+            }
+        }
+
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -158,13 +168,17 @@ public class enemyController : MonoBehaviour
 		}
 
 
-        
+        if (strafeTimer > 0)
+        {
+            strafeTimer -= Time.deltaTime;
+        }
 
 
         if (info.IsName("Pursuing"))
         {
             //print ("PURSUING");
-            CollisionAvoidance();
+            //CollisionAvoidance();
+            Turn();
             Move();
         }
         else if (info.IsName("Patrolling"))
@@ -255,13 +269,15 @@ public class enemyController : MonoBehaviour
 				print ("Enemy Hit: " + matkHit.transform.gameObject);
 				if (matkHit.transform.gameObject.tag == "player") {
 					print ("SHOULD BE LOWERING HEALTH");
-					matkHit.transform.gameObject.GetComponent<playerController> ().lowerHealth (40);
+					matkHit.transform.gameObject.GetComponent<playerController> ().lowerHealth (20);
 				}
 			}
-		}
-		attackCooldown = 4.0f;
+            attackCooldown = 4.0f;
+        }
+		
+        //newSelection ();
         anim.SetTrigger("combat");
-        newSelection ();
+        
 	}
 
 	//Creates a ranged attack using a raycast.
@@ -270,13 +286,14 @@ public class enemyController : MonoBehaviour
 	{
 		if (attackCooldown <= 0.0f) {
 			print ("RANGED ATTACK!");
-			attackCooldown = 6.0f;
+			
 			GameObject g = (GameObject)Instantiate (projectile, transform.position + transform.forward * 3.0f, Quaternion.identity);	
 			g.GetComponent<Rigidbody> ().AddForce (transform.forward * 4000);
 			Destroy (g, 1);
-		}
-
-            anim.SetTrigger(triggerForReturn);
+            attackCooldown = 6.0f;
+        }
+        //newSelection();
+        anim.SetTrigger(triggerForReturn);
 
 	}
 
@@ -411,7 +428,7 @@ public class enemyController : MonoBehaviour
 
     void combatStrafe ()
 	{
-		
+        /*
 		//print ("DIRECTION SELECTED! " + strafeDir);
 		//print ("STRAFE TIMER: " + strafeTimer);
 		if (strafeTimer > 0) {
@@ -428,7 +445,29 @@ public class enemyController : MonoBehaviour
 		}
 
 		strafeTimer -= Time.deltaTime;
-	}
+
+        */
+
+        if (strafeDirFB == 1 && distanceToPlayer > 2.0f)
+        {
+            cc.Move(transform.forward * movementSpeed * Time.deltaTime);
+        }
+        else if (strafeDirFB == 2 && distanceToPlayer < 10.0f)
+        {
+            cc.Move(-transform.forward * movementSpeed * Time.deltaTime);
+        }
+
+        if (strafeDirLR == 1)
+        {
+            cc.Move(transform.right * movementSpeed * Time.deltaTime);
+        }
+        else if (strafeDirLR == 2)
+        {
+            cc.Move(-transform.right * movementSpeed * Time.deltaTime);
+        }
+
+
+    }
 
 	//Faces NPC towards target, be it player or waypoint. Also used to make decisions based on distance to target.
 
@@ -436,14 +475,14 @@ public class enemyController : MonoBehaviour
 	{
 		//print ("Target = " + target.name);
 
-		if (target == null && info.IsName("CombatCiv")) 
+		if ((target == null || Vector3.Distance(transform.position, target.transform.position) > 50) && info.IsName("CombatCiv")) 
 		{
 			target = patrolWaypoints [waypointNum].transform;
             anim.SetTrigger("patrol");
         }
 
 
-		Vector3 pos = target.position - transform.position;
+		Vector3 pos = (target.position + (transform.up * 1)) - transform.position;
 		Quaternion rotation = Quaternion.LookRotation (pos);
 
 		transform.rotation = Quaternion.Slerp (transform.rotation, rotation, rotationalDamp * Time.deltaTime);
@@ -473,6 +512,7 @@ public class enemyController : MonoBehaviour
 				Move ();
 			} else
 			{
+                triggerForReturn = "combatCiv";
                 anim.SetTrigger("ranged");
             }
 		}
@@ -536,16 +576,17 @@ public class enemyController : MonoBehaviour
 
 	public void guard ()
 	{
-		while (guardTime < 2) {
+		while (guardTime < 1) {
 			guardTime += Time.deltaTime;
 			guarding = true;
 		}
 
-        anim.SetTrigger("combat");
+       
         guardTime = 0;
-		attackCooldown = 3.0f;
-		newSelection ();
-	}
+		attackCooldown = 6.0f;
+        anim.SetTrigger("combat");
+        //newSelection ();
+    }
 
     //Moving once in combat range
 
@@ -559,8 +600,21 @@ public class enemyController : MonoBehaviour
         {
             if (hit.gameObject.tag == "enemy")
             {
-                hit.gameObject.GetComponent<enemyController>().initStun(2.0f);
-                hit.gameObject.GetComponent<enemyController>().lowerHealth(50);
+                if (hit.gameObject.GetComponent<enemyController>() != null)
+                {
+                    hit.gameObject.GetComponent<enemyController>().initStun(2.0f);
+                    hit.gameObject.GetComponent<enemyController>().lowerHealth(50);
+                }
+                else if (hit.gameObject.GetComponent<EnemySniperController>() != null)
+                {
+                    hit.gameObject.GetComponent<EnemySniperController>().initStun(2.0f);
+                    hit.gameObject.GetComponent<EnemySniperController>().lowerHealth(50);
+                }
+                if (hit.gameObject.GetComponent<EnemyMedicController>() != null)
+                {
+                    hit.gameObject.GetComponent<EnemyMedicController>().initStun(2.0f);
+                    hit.gameObject.GetComponent<EnemyMedicController>().lowerHealth(50);
+                }
             }
 
             else if (hit.gameObject.tag == "destructible")
@@ -580,27 +634,66 @@ public class enemyController : MonoBehaviour
 	{
 		Turn ();
 
-		if (distanceToPlayer > 4.0f && distanceToPlayer < 100.0f) {
-			Move ();
-		} else if (distanceToPlayer <= 4.0f) {
-			combatStrafe ();
-		} else {
-            anim.SetTrigger("pursue");
-        }
+        /*
+        print("Distance To Player: " + distanceToPlayer);
 
+		if (distanceToPlayer > 20.0f && distanceToPlayer < 100.0f) {
+			Move ();
+		} else if (distanceToPlayer <= 20.0f) {
+			combatStrafe ();
+		}
+
+        
 		//print ("SELECTION = " + selection);
 		if (attackCooldown <= 0.0f) {
-			if (selection == 1 && distanceToPlayer <= 4.0f) {
+			if (selection == 1 && distanceToPlayer <= 6.0f) {
 
                 anim.SetTrigger("melee");
             } else if (selection == 2) {
-
+                triggerForReturn = "combat";
                 anim.SetTrigger("ranged");
             } else if (selection == 3) {
 
                 anim.SetTrigger("guard");
             }
-		}
+		}*/
+
+        if (attackCooldown <= 0.0f)
+        {
+            newSelection();
+        }
+
+        if (strafeTimer <= 0.0f)
+        {
+            strafeDirFB = Random.Range(0, 3);
+            strafeDirLR = Random.Range(0, 3);
+            strafeTimer = Random.Range(0.5f, 1.5f);
+        }
+        else if (attackCooldown <= 0.0f)
+        {
+            if (selection == 1 && distanceToPlayer <= 6.0f)
+            {
+
+                anim.SetTrigger("melee");
+            }
+            else if (selection == 2)
+            {
+                triggerForReturn = "combat";
+                anim.SetTrigger("ranged");
+            }
+            else if (selection == 3)
+            {
+
+                anim.SetTrigger("guard");
+            }
+        }
+        else
+        {
+            combatStrafe();
+        }
+
+
+
 	}
 
 	//Creates a selection of which action to perform in combat

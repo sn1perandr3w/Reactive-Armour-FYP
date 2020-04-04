@@ -43,14 +43,71 @@ public class swordHitBox : MonoBehaviour
                         if (comboHit >= 4)
                         {
                             //print("KNOCKBACK FROM HITBOX");
-                            enemy.GetComponent<enemyController>().initKnockBack(transform.parent, 0.2f, 40.0f);
+                            //enemy.GetComponent<enemyController>().initKnockBack(transform.parent, 0.2f, 40.0f);
+
+                            if (enemy.gameObject.GetComponent<enemyController>() != null)
+                            {
+                                enemy.gameObject.GetComponent<enemyController>().initKnockBack(transform.parent, 0.2f, 40.0f);
+
+                            }
+
+                            else if (enemy.gameObject.GetComponent<EnemyMedicController>() != null)
+                            {
+                                enemy.gameObject.GetComponent<EnemyMedicController>().initKnockBack(transform.parent, 0.2f, 40.0f);
+
+                            }
+                            else if (enemy.gameObject.GetComponent<EnemySniperController>() != null)
+                            {
+                                enemy.gameObject.GetComponent<EnemySniperController>().initKnockBack(transform.parent, 0.2f, 40.0f);
+
+                            }
+
+
                         }
                         else
                         {
                             //print("STUN FROM HITBOX");
-                            enemy.GetComponent<enemyController>().initStun(0.1f);
+                            //enemy.GetComponent<enemyController>().initStun(0.1f);
+
+
+                            if (enemy.gameObject.GetComponent<enemyController>() != null)
+                            {
+                                enemy.gameObject.GetComponent<enemyController>().initStun(0.1f);
+
+                            }
+
+                            else if (enemy.gameObject.GetComponent<EnemyMedicController>() != null)
+                            {
+                                enemy.gameObject.GetComponent<EnemyMedicController>().initStun(0.1f);
+
+                            }
+                            else if (enemy.gameObject.GetComponent<EnemySniperController>() != null)
+                            {
+                                enemy.gameObject.GetComponent<EnemySniperController>().initStun(0.1f);
+
+                            }
+
+
                         }
-                        enemy.GetComponent<enemyController>().lowerHealth(damage);
+
+                        if (enemy.gameObject.GetComponent<enemyController>() != null)
+                        {
+                            enemy.gameObject.GetComponent<enemyController>().lowerHealth(damage);
+
+                        }
+
+                        else if (enemy.gameObject.GetComponent<EnemyMedicController>() != null)
+                        {
+                            enemy.gameObject.GetComponent<EnemyMedicController>().lowerHealth(damage);
+
+                        }
+                        else if (enemy.gameObject.GetComponent<EnemySniperController>() != null)
+                        {
+                            enemy.gameObject.GetComponent<EnemySniperController>().lowerHealth(damage);
+
+                        }
+
+                        
                         enemiesHit.Add(enemy);
                         }
                 }

@@ -106,7 +106,14 @@ public class ThirdPersonCamera : MonoBehaviour
 
             GameObject enemyLabel = (GameObject)Instantiate(enemyUILabel);
             enemyLabel.transform.SetParent(hud.transform);
+            if(enemy.GetComponent<enemyController>() != null)
             enemyLabel.GetComponent<Text>().text = enemy.GetComponent<enemyController>().enemyName;
+            else if (enemy.GetComponent<EnemyMedicController>() != null)
+            enemyLabel.GetComponent<Text>().text = enemy.GetComponent<EnemyMedicController>().enemyName;
+            else if (enemy.GetComponent<EnemySniperController>() != null)
+                enemyLabel.GetComponent<Text>().text = enemy.GetComponent<EnemySniperController>().enemyName;
+
+
             enemyLabels.Add(enemyLabel);
 
         }
@@ -167,13 +174,17 @@ public class ThirdPersonCamera : MonoBehaviour
 
 
                         float enemyDistanceToPlayer = Vector3.Distance(player.transform.position, enemy.transform.position);
-                        if (enemyDistanceToPlayer <= 100.0f && !enemiesInLockOnRange.Contains(enemy) && enemy.GetComponent<enemyController>().grabbed == false)
+                        if (enemyDistanceToPlayer <= 100.0f && !enemiesInLockOnRange.Contains(enemy) && (enemy.GetComponent<enemyController>() != null && enemy.GetComponent<enemyController>().grabbed == false || enemy.GetComponent<EnemyMedicController>()!= null && enemy.GetComponent<EnemyMedicController>().grabbed == false || enemy.GetComponent<EnemySniperController>() != null && enemy.GetComponent<EnemySniperController>().grabbed == false))
                         {
                             enemiesInLockOnRange.Add(enemy);
                             if (initialLockOn == true && zoom == false)
                             {
                                 camTarget = enemiesInLockOnRange[0];
                                 playerTarget = enemiesInLockOnRange[0];
+                                if (enemiesInLockOnRange[0].GetComponent<EnemyMedicController>() != false)
+                                {
+                                    enemiesInLockOnRange[0].GetComponent<EnemyMedicController>().isTargeted = true;
+                                }
                                 initialLockOn = false;
                             }
                         }
@@ -231,8 +242,8 @@ public class ThirdPersonCamera : MonoBehaviour
                 }
             }
 
-            
-            
+
+
 
 
             if (!interactables.Equals(0))
@@ -241,16 +252,17 @@ public class ThirdPersonCamera : MonoBehaviour
                 {
 
                     float interactableDistanceToPlayer = Vector3.Distance(player.transform.position, interactable.transform.position);
-                    if (interactableDistanceToPlayer <= 20.0f)
+                    float interactableDistance = interactable.GetComponent<interactableScript>().interactDistance;
+                    if (interactableDistanceToPlayer <= interactableDistance)
                     {
-                        GameObject.Find("UIInteractPrompt").GetComponent<Text>().text = "Press F to Interact";
+                        
 
                         if (!interactablesInRange.Contains(interactable))
-                        interactablesInRange.Add(interactable);
+                            interactablesInRange.Add(interactable);
                     }
-                    else if (interactableDistanceToPlayer > 20.0f)
+                    else if (interactableDistanceToPlayer > interactableDistance)
                     {
-                        GameObject.Find("UIInteractPrompt").GetComponent<Text>().text = "";
+                        
 
 
                         if (interactablesInRange.Contains(interactable))
@@ -258,13 +270,26 @@ public class ThirdPersonCamera : MonoBehaviour
                     }
                 }
 
+
+                if (interactablesInRange.Count > 0)
+                {
+                    GameObject.Find("UIInteractPrompt").GetComponent<Text>().text = "Press X to Interact";
+                }
+                else
+                {
+                    GameObject.Find("UIInteractPrompt").GetComponent<Text>().text = "";
+                }
+            }
+            else
+            {
+                GameObject.Find("UIInteractPrompt").GetComponent<Text>().text = "";
             }
         
 
 
         GameObject.Find("UIEnemyCount").GetComponent<Text>().text = "Enemies in Area: " + enemies.Count;
 
-        if (Input.GetKey(KeyCode.F) && interactablesInRange.Count > 0)
+        if (Input.GetKey(KeyCode.X) && interactablesInRange.Count > 0)
         {
             foreach (GameObject interactable in interactablesInRange)
             {
@@ -319,8 +344,15 @@ public class ThirdPersonCamera : MonoBehaviour
         {
                 if (enemiesInLockOnRange.Count > 0)
                 {
+                    if(camTarget.GetComponent<EnemyMedicController>() != null)
+                    camTarget.GetComponent<EnemyMedicController>().isTargeted = false;
+
                     camTarget = enemiesInLockOnRange[lockOnSelection];
                     playerTarget = enemiesInLockOnRange[lockOnSelection];
+
+                    if (camTarget.GetComponent<EnemyMedicController>() != null)
+                        camTarget.GetComponent<EnemyMedicController>().isTargeted = true;
+
                     if ((lockOnSelection + 1) != enemiesInLockOnRange.Count)
                     {
                         lockOnSelection++;
@@ -329,6 +361,7 @@ public class ThirdPersonCamera : MonoBehaviour
                     {
                         lockOnSelection = 0;
                     }
+
                     keyDownTime = 0.0f;
                 }
                 
@@ -518,12 +551,18 @@ public class ThirdPersonCamera : MonoBehaviour
             if (playerTarget != null && playerTarget.tag == "enemy")
             {
 
-
-                GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy: " + playerTarget.GetComponent<enemyController>().enemyName;
+                if(playerTarget.GetComponent<enemyController>() != null)
+                GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy Health: " + playerTarget.GetComponent<enemyController>().health +"%";
+                else
+                    if (playerTarget.GetComponent<EnemyMedicController>() != null)
+                    GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy Health: " + playerTarget.GetComponent<EnemyMedicController>().health + "%";
+                else
+                    if (playerTarget.GetComponent<EnemySniperController>() != null)
+                    GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy Health: " + playerTarget.GetComponent<EnemySniperController>().health + "%";
             }
             else
             {
-                GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy: NONE";
+                GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy Health: N/A";
             }
         }
     }
@@ -628,7 +667,11 @@ public class ThirdPersonCamera : MonoBehaviour
         currentX = player.transform.eulerAngles.y;
 
 
-
+        if (camTarget.GetComponent<EnemyMedicController>() != null)
+        {
+            
+            camTarget.GetComponent<EnemyMedicController>().isTargeted = false;
+        }
 
 
         camTarget = aimTarget;

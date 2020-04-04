@@ -102,7 +102,24 @@ public class MineController : MonoBehaviour
         {
             if (col.gameObject.tag == "enemy")
             {
-                col.gameObject.GetComponent<enemyController>().lowerHealth(100);
+               
+                if (col.gameObject.GetComponent<enemyController>() != null)
+                {
+                    col.gameObject.GetComponent<enemyController>().lowerHealth(100);
+                    
+                }
+
+                else if (col.gameObject.GetComponent<EnemyMedicController>() != null)
+                {
+                    col.gameObject.GetComponent<EnemyMedicController>().lowerHealth(100);
+                    
+                }
+                else if (col.gameObject.GetComponent<EnemySniperController>() != null)
+                {
+                    col.gameObject.GetComponent<EnemySniperController>().lowerHealth(100);
+                    
+                }
+
             }
             else
             if (col.gameObject.tag == "destructible")

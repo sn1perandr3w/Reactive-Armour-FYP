@@ -31,8 +31,22 @@ public class clusterBombScript : MonoBehaviour
         {
             if (col.gameObject.tag == "enemy")
             {
-                col.gameObject.GetComponent<enemyController>().lowerHealth(10);
-                col.gameObject.GetComponent<enemyController>().initKnockBack(player.transform, 0.2f, 40.0f);
+                if (col.gameObject.GetComponent<enemyController>() != null)
+                {
+                    col.gameObject.GetComponent<enemyController>().lowerHealth(10);
+                    col.gameObject.GetComponent<enemyController>().initKnockBack(player.transform, 0.2f, 40.0f);
+                }
+
+                else if (col.gameObject.GetComponent<EnemyMedicController>() != null)
+                {
+                    col.gameObject.GetComponent<EnemyMedicController>().lowerHealth(10);
+                    col.gameObject.GetComponent<EnemyMedicController>().initKnockBack(player.transform, 0.2f, 40.0f);
+                }
+                else if (col.gameObject.GetComponent<EnemySniperController>() != null)
+                {
+                    col.gameObject.GetComponent<EnemySniperController>().lowerHealth(10);
+                    col.gameObject.GetComponent<EnemySniperController>().initKnockBack(player.transform, 0.2f, 40.0f);
+                }
             }
             else
             if (col.gameObject.tag == "destructible")

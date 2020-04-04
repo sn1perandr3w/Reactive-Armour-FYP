@@ -7,6 +7,8 @@ using UnityEngine;
 public class projectileScript : MonoBehaviour {
 
 
+    public bool allyProjectile = false;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -19,18 +21,53 @@ public class projectileScript : MonoBehaviour {
 
 	void OnCollisionEnter(Collision coll)
 	{
-		
-		//Removes health from Player.
 
-		if (coll.gameObject.tag == "player") {
+       
 
-			coll.gameObject.GetComponent<playerController>().lowerHealth(20);
-		}
+        //Removes health from Player.
+        if (allyProjectile != true)
+        {
+            if (coll.gameObject.tag == "player")
+            {
 
-		if (coll.gameObject.tag == "destructible") {
-			print ("HITTING CIVILIANS");
-			coll.gameObject.GetComponent<destructible>().lowerHealth(20);
-		}
+                coll.gameObject.GetComponent<playerController>().lowerHealth(20);
+            }
+            else
+            if (coll.gameObject.tag == "destructible")
+            {
+                print("HITTING CIVILIANS");
+                coll.gameObject.GetComponent<destructible>().lowerHealth(20);
+            }
+            else if (coll.gameObject.tag == "ally")
+            {
+                print("HITTING ALLY");
+                coll.gameObject.GetComponent<AllySecurityMechController>().lowerHealth(20);
+            }
+        }
+        else
+        {
+            if (coll.gameObject.tag == "enemy")
+            {
+                if (coll.gameObject.GetComponent<enemyController>() != null)
+                {
+                    coll.gameObject.GetComponent<enemyController>().lowerHealth(100);
+
+                }
+
+                else if (coll.gameObject.GetComponent<EnemyMedicController>() != null)
+                {
+                    coll.gameObject.GetComponent<EnemyMedicController>().lowerHealth(100);
+
+                }
+                else if (coll.gameObject.GetComponent<EnemySniperController>() != null)
+                {
+                    coll.gameObject.GetComponent<EnemySniperController>().lowerHealth(100);
+
+                }
+
+
+            }
+        }
 			
 		Object.Destroy (this.gameObject);
 	}

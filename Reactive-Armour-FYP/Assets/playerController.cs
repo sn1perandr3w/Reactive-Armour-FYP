@@ -19,7 +19,7 @@ public class playerController : MonoBehaviour
 	float speedMult = 50.0f;
 	CharacterController cc;
 	public int healthLimit;
-	int health;
+	public int health;
 
     public int shieldHealth;
     public float shieldRechargeDelay = 0.0f;
@@ -98,6 +98,10 @@ public class playerController : MonoBehaviour
     public List<Vector3> clusterBombPositions;
     public bool clusterBombsDeployed = false;
 
+    public Texture [] weaponIcons;
+    public GameObject PlasmaLanceOverheatText;
+    public bool plasmaLanceOverheated = false;
+
     void Start()
 	{
         swordHitbox = this.gameObject.transform.GetChild(2).gameObject;
@@ -119,8 +123,8 @@ public class playerController : MonoBehaviour
 		audiosource2.loop = true;
 		audiosource2.clip = lowHealth;
 
-		healthLimit = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
-		health = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
+		//healthLimit = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
+		//health = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
         shieldHealth = 100;
 		ammoLimit = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
 		ammo = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
@@ -189,14 +193,15 @@ public class playerController : MonoBehaviour
 
             GameObject.Find("UIHealth").GetComponent<Text>().text = "Health: " + health + "%";
             GameObject.Find("UIShield").GetComponent<Text>().text = "Shield: " + shieldHealth + "%";
-            GameObject.Find("UIWeapon").GetComponent<Text>().text = "Subweapon:" + weaponList[weaponSelect];
-            GameObject.Find("UIAmmo").GetComponent<Text>().text = "Subweapon Ammo: " + ammo;
-            GameObject.Find("UIObjective").GetComponent<Text>().text = "Objective:";
-            GameObject.Find("UIObjective2").GetComponent<Text>().text = objective;
-            GameObject.Find("UITotalCivs").GetComponent<Text>().text = "Total Saved: " + civSaved;
-            GameObject.Find("UILevel").GetComponent<Text>().text = "Level: " + level;
-            GameObject.Find("UIOverheat").GetComponent<Text>().text = (plasmaLanceOverheatTime/6.0f * 100/1).ToString("F0") + "%";
+            GameObject.Find("UIWeapon").GetComponent<Text>().text = "" + weaponList[weaponSelect];
+            GameObject.Find("UIAmmo").GetComponent<Text>().text = "Ammo: " + ammo;
+            //GameObject.Find("UIObjective").GetComponent<Text>().text = "Objective:";
+            //GameObject.Find("UIObjective2").GetComponent<Text>().text = objective;
+            //GameObject.Find("UITotalCivs").GetComponent<Text>().text = "Total Saved: " + civSaved;
+            //GameObject.Find("UILevel").GetComponent<Text>().text = "Level: " + level;
+            
             Debug.DrawRay(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, Color.red);
+
 
 
             if (attackCooldown > 0)
@@ -206,7 +211,21 @@ public class playerController : MonoBehaviour
 
             if (plasmaLanceOverheatTime > 0.0f && !Input.GetKey(KeyCode.Mouse0) || plasmaLanceOverheatTime > 0.0f && attackCooldown > 0.0f)
             {
+                if (plasmaLanceOverheated == false)
+                {
+                    PlasmaLanceOverheatText.GetComponent<Text>().text = "Heat: " + (plasmaLanceOverheatTime / 6.0f * 100 / 1).ToString("F0") + "%";
+                }
+                else
+                {
+                    PlasmaLanceOverheatText.GetComponent<Text>().text = "ERROR: OVERHEAT";
+                }
                 plasmaLanceOverheatTime -= Time.deltaTime;
+
+                if (plasmaLanceOverheatTime <= 0.0f)
+                {
+                    plasmaLanceOverheated = false;
+                    PlasmaLanceOverheatText.SetActive(false);
+                }
             }
 
 
@@ -443,10 +462,25 @@ public class playerController : MonoBehaviour
                         hit.transform.gameObject.GetComponent<destructible>().lowerHealth(100);
                     }
                     else
-                        if (hit.transform.gameObject.tag == "enemy" && hit.transform.gameObject.GetComponent<enemyController>().guarding == false && attackCooldown <= 0.0f)
+                        if (hit.transform.gameObject.tag == "enemy")
                     {
-                        print("SHOULD BE LOWERING HEALTH");
-                        hit.transform.gameObject.GetComponent<enemyController>().lowerHealth(Mathf.RoundToInt(50 * damageMultiplier));
+                        if (hit.transform.gameObject.GetComponent<enemyController>() != null && hit.transform.gameObject.GetComponent<enemyController>().guarding == false && attackCooldown <= 0.0f)
+                        {
+                            print("SHOULD BE LOWERING HEALTH");
+                            hit.transform.gameObject.GetComponent<enemyController>().lowerHealth(Mathf.RoundToInt(50 * damageMultiplier));
+                        }
+                        else
+                        if (hit.transform.gameObject.GetComponent<EnemyMedicController>() != null && hit.transform.gameObject.GetComponent<EnemyMedicController>().guarding == false && attackCooldown <= 0.0f)
+                        {
+                            print("SHOULD BE LOWERING HEALTH");
+                            hit.transform.gameObject.GetComponent<EnemyMedicController>().lowerHealth(Mathf.RoundToInt(50 * damageMultiplier));
+                        }
+                        else
+                            if (hit.transform.gameObject.GetComponent<EnemySniperController>() != null && attackCooldown <= 0.0f)
+                        {
+                            print("SHOULD BE LOWERING HEALTH");
+                            hit.transform.gameObject.GetComponent<EnemySniperController>().lowerHealth(Mathf.RoundToInt(50 * damageMultiplier));
+                        }
                     }
                 }
 
@@ -472,7 +506,16 @@ public class playerController : MonoBehaviour
             if (grabTarget != null && grabHeld == true)
             {
                 grabTarget.transform.position = transform.position + (transform.forward * 1.5f);
+                if(grabTarget.GetComponent<enemyController>() != null)
                 grabTarget.GetComponent<enemyController>().initStun(0.5f);
+
+                else if (grabTarget.GetComponent<EnemyMedicController>() != null)
+                    grabTarget.GetComponent<EnemyMedicController>().initStun(0.5f);
+
+                else if (grabTarget.GetComponent<EnemySniperController>() != null)
+                    grabTarget.GetComponent<EnemySniperController>().initStun(0.5f);
+
+
                 //playerCamera.GetComponent<ThirdPersonCamera>().grabCameraReset();
                 //grabHeld = true;
             }
@@ -588,6 +631,13 @@ public class playerController : MonoBehaviour
             if (weaponSelect == 6 && attackCooldown <= 0.0f)
         {
             plasmaLanceOverheatTime += Time.deltaTime;
+            if (PlasmaLanceOverheatText.activeSelf != true)
+            {
+                PlasmaLanceOverheatText.SetActive(true);
+            }
+
+            PlasmaLanceOverheatText.GetComponent<Text>().text = "Heat: " + (plasmaLanceOverheatTime / 6.0f * 100 / 1).ToString("F0") + "%";
+
             print("PLASMA LANCE");
 
             if (attackKeyDownTime > 2.0f)
@@ -601,6 +651,7 @@ public class playerController : MonoBehaviour
                 plasmaLanceRenderer.enabled = false;
                 attackCooldown = 10.0f;
                 plasmaLanceHitbox.GetComponent<PlasmaLanceHitBox>().hitboxInactive();
+                plasmaLanceOverheated = true;
 
             }
             else
@@ -647,10 +698,10 @@ public class playerController : MonoBehaviour
 
 		if (Input.GetKey (KeyCode.LeftShift)) 
 		{
-			speedMult = 100.0f;
+			speedMult = 50.0f;
 		} else 
 		{
-			speedMult = 50.0f;
+			speedMult = 20.0f;
 		}
 
 		var x = Input.GetAxis("Horizontal") * Time.deltaTime * speedMult;
@@ -681,10 +732,27 @@ public class playerController : MonoBehaviour
             if (weaponSelect == 2 && grabTarget != null)
             {
                 grabTarget.transform.position = transform.position + (transform.forward * 3.0f);
-                grabTarget.GetComponent<enemyController>().initKnockBack(transform, 0.6f, 80.0f);
+                if (grabTarget.GetComponent<enemyController>() != null)
+                {
+                    grabTarget.GetComponent<enemyController>().initKnockBack(transform, 0.6f, 80.0f);
+                    grabTarget.GetComponent<enemyController>().grabbed = false;
+                    grabTarget.GetComponent<enemyController>().thrown = true;
+                }
+                else if (grabTarget.GetComponent<EnemyMedicController>() != null)
+                {
+                    grabTarget.GetComponent<EnemyMedicController>().initKnockBack(transform, 0.6f, 80.0f);
+                    grabTarget.GetComponent<EnemyMedicController>().grabbed = false;
+                    grabTarget.GetComponent<EnemyMedicController>().thrown = true;
+                }
+                else if (grabTarget.GetComponent<EnemySniperController>() != null)
+                {
+                    grabTarget.GetComponent<EnemySniperController>().initKnockBack(transform, 0.6f, 80.0f);
+                    grabTarget.GetComponent<EnemySniperController>().grabbed = false;
+                    grabTarget.GetComponent<EnemySniperController>().thrown = true;
+                }
+
                 // playerCamera.GetComponent<ThirdPersonCamera>().enemiesInLockOnRange.Add(grabTarget);
-                grabTarget.GetComponent<enemyController>().grabbed = false;
-                grabTarget.GetComponent<enemyController>().thrown = true;
+
                 grabTarget = null;
                 
                 grabHeld = false;
@@ -766,7 +834,9 @@ public class playerController : MonoBehaviour
 			{
 				weaponSelect = 0;
 			}
-		} 
+
+            GameObject.Find("UIWeaponIcon").GetComponent<RawImage>().texture = weaponIcons[weaponSelect];
+        } 
 
 		if (Input.GetKey (KeyCode.Escape)) {
 			if (ableToEscape == true) {

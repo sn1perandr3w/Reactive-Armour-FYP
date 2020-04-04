@@ -29,4 +29,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/testRoom.unity
     guid: 2a2185b01c76df449b6c7ac7cbdfabcc
+  - enabled: 1
+    path: Assets/ShipExterior.unity
+    guid: fdfad30b3919a7e42b96626b5ee95293
+  - enabled: 1
+    path: Assets/ShipInterior.unity
+    guid: e6a94a61725b94a49954bbcbea5da1e5
   m_configObjects: {}
