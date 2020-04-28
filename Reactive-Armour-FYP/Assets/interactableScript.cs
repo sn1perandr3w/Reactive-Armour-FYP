@@ -21,7 +21,19 @@ public class interactableScript : MonoBehaviour
     public bool levelTransitionInteractable = false;
     public string levelToTransition = "";
 
+
+    public bool awakenableInteractible = false;
     // Start is called before the first frame update
+
+    void OnEnable()
+    {
+       GameObject p = GameObject.Find("PlayerCamera");
+
+        p.GetComponent<ThirdPersonCamera>().interactables.Add(this.gameObject);
+
+    }
+
+
     void Start()
     {
     
@@ -42,6 +54,19 @@ public class interactableScript : MonoBehaviour
         {
             if (levelTransitionInteractable == true)
             {
+                GameObject civController = GameObject.Find("civController");
+                int civSaved = PlayerPrefs.GetInt("civSaved");
+
+                civSaved += civController.GetComponent<civController>().actualCivAmount;
+                PlayerPrefs.SetInt("civSaved", civSaved);
+                PlayerPrefs.SetString("scene", SceneManager.GetActiveScene().name);
+
+                GameObject player = GameObject.FindGameObjectWithTag("player");
+
+                PlayerPrefs.SetInt("healthSaved", player.GetComponent<playerController>().health);
+                PlayerPrefs.SetInt("ammoSaved", player.GetComponent<playerController>().ammo);
+
+
                 SceneManager.LoadScene(levelToTransition);
             }
 

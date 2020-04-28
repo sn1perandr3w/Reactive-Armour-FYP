@@ -120,6 +120,12 @@ public class MineController : MonoBehaviour
                     
                 }
 
+                else if (col.gameObject.GetComponent<EnemyCombatEngineerController>() != null)
+                {
+                    col.gameObject.GetComponent<EnemyCombatEngineerController>().lowerHealth(100);
+
+                }
+
             }
             else
             if (col.gameObject.tag == "destructible")

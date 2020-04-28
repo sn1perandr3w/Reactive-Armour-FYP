@@ -16,7 +16,7 @@ public class objectiveController : MonoBehaviour
         public int status;
 
 
-        //0 Defend until area clear, 1 Item retrieval, 2 Escort, 3 Activation
+        //0 Defend until area clear, 1 Item retrieval, 2 Escort, 3 Activation, 4 Seek and Destroy
         public int objectiveType;
 
         public List<GameObject> objectiveActors;
@@ -29,6 +29,13 @@ public class objectiveController : MonoBehaviour
         public int minEnemiesAlive;
 
         public float distanceThreshold;
+
+        public bool persistentFlag = false;
+        //0 = flag gets triggered on loss. 1 = flag gets triggered on win
+        public int flagWinOrLoss = 1;
+        public string flagToSave;
+        public int flagStatus;
+
     }
 
 
@@ -138,9 +145,34 @@ public class objectiveController : MonoBehaviour
                 if (objectives[i].objectiveActors[0].GetComponent<interactableScript>().isActivated == true)
                 {
                     objectives[i].status = 1;
+
+                    if (objectives[i].persistentFlag && objectives[i].flagWinOrLoss == 1)
+                    {
+                        PlayerPrefs.SetInt(objectives[i].flagToSave, objectives[i].flagStatus);
+                    }
+
                     UpdateObjectives();
                 }
                 
+            }
+            else
+            //4 Seek and Destroy
+            if (objectives[i].objectiveType == 4)
+            {
+
+                //Targets destroyed. Objective completed.
+                if (objectives[i].enemyObjectiveActors.Count == 0)
+                {
+                    objectives[i].status = 1;
+
+                    if (objectives[i].persistentFlag && objectives[i].flagWinOrLoss == 1)
+                    {
+                        PlayerPrefs.SetInt(objectives[i].flagToSave, objectives[i].flagStatus);
+                    }
+
+                    UpdateObjectives();
+                }
+
             }
         }
     }

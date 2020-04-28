@@ -147,7 +147,7 @@ public class AllySecurityMechController : MonoBehaviour
             {
                 float distance = Vector3.Distance(transform.position, target.transform.position);
                 //print("Distance = " + distance);
-                if (distance < 50.0f)
+                if (distance < 200.0f)
                 {
                     transform.LookAt(target.transform);
 
@@ -158,7 +158,7 @@ public class AllySecurityMechController : MonoBehaviour
                         anim.SetTrigger("ranged");
                     }
                 }
-                else if (distance >= 50.0f)
+                else if (distance >= 200.0f)
                 {
                     Move();
                 }
@@ -206,11 +206,11 @@ public class AllySecurityMechController : MonoBehaviour
                 
 
 
-                if (Vector3.Distance(transform.position, enemies[i].transform.position) <= 50 && !enemiesInAttackRange.Contains(enemies[i]))
+                if (Vector3.Distance(transform.position, enemies[i].transform.position) <= 200 && !enemiesInAttackRange.Contains(enemies[i]))
                 {
                     enemiesInAttackRange.Add(enemies[i]);
                 }
-                else if (Vector3.Distance(transform.position, enemies[i].transform.position) > 50 && enemiesInAttackRange.Contains(enemies[i]))
+                else if (Vector3.Distance(transform.position, enemies[i].transform.position) > 200 && enemiesInAttackRange.Contains(enemies[i]))
                 {
                     enemiesInAttackRange.Remove(enemies[i]);
                 }

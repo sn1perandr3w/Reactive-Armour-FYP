@@ -121,116 +121,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 23800000, guid: 9c53f6911f726c640af24386f28ceff0, type: 2}
---- !u!1 &15314486
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 15314487}
-  - component: {fileID: 15314490}
-  - component: {fileID: 15314489}
-  - component: {fileID: 15314488}
-  - component: {fileID: 15314491}
-  m_Layer: 0
-  m_Name: plasmaLancehitbox
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &15314487
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 15314486}
-  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 15}
-  m_LocalScale: {x: 1.5, y: 15, z: 1.5}
-  m_Children: []
-  m_Father: {fileID: 272217323}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!136 &15314488
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 15314486}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &15314489
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 15314486}
-  m_Enabled: 0
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: a524807c346960b42a1c73faa12d1cd0, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
---- !u!33 &15314490
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 15314486}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &15314491
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 15314486}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 120c98970076d114eb15580d5c47b051, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enemiesToHit: []
-  enemyInvincibility: []
-  enemiesHit: []
-  activeHitbox: 0
 --- !u!1 &24081238
 GameObject:
   m_ObjectHideFlags: 0
@@ -309,6 +199,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 22
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &50333557 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 50333557, guid: e739388e53aeac249af8afd5a6ade80a,
+    type: 3}
+  m_PrefabInstance: {fileID: 240563441941146820}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &55739968
 GameObject:
   m_ObjectHideFlags: 0
@@ -364,6 +260,10 @@ MonoBehaviour:
     - {fileID: 1289502224261696}
     minEnemiesAlive: 0
     distanceThreshold: 0
+    persistentFlag: 0
+    flagWinOrLoss: 1
+    flagToSave: 
+    flagStatus: 0
   - objectiveDesc: Collect Data
     status: 0
     objectiveType: 1
@@ -374,6 +274,10 @@ MonoBehaviour:
     enemyObjectiveActors: []
     minEnemiesAlive: 0
     distanceThreshold: 0
+    persistentFlag: 0
+    flagWinOrLoss: 1
+    flagToSave: 
+    flagStatus: 0
   - objectiveDesc: Escort Civilian to Tunnel
     status: 0
     objectiveType: 2
@@ -387,6 +291,10 @@ MonoBehaviour:
     - {fileID: 1289502224261696}
     minEnemiesAlive: 0
     distanceThreshold: 20
+    persistentFlag: 0
+    flagWinOrLoss: 1
+    flagToSave: 
+    flagStatus: 0
   - objectiveDesc: Activate Console
     status: 0
     objectiveType: 3
@@ -397,6 +305,10 @@ MonoBehaviour:
     enemyObjectiveActors: []
     minEnemiesAlive: 0
     distanceThreshold: 0
+    persistentFlag: 0
+    flagWinOrLoss: 1
+    flagToSave: 
+    flagStatus: 0
   objectivesListText: {fileID: 1817559448}
   objectiveStateText:
   - Failed
@@ -764,15 +676,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 0
+  interactDistance: 20
+  singleUse: 0
+  singleUseActivated: 0
+  objectsToToggle: []
+  levelTransitionInteractable: 0
+  levelToTransition: 
+  awakenableInteractible: 0
 --- !u!1 &272217313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1062120453602406, guid: e41985b88641bdb4585868535a3af673,
-    type: 3}
-  m_PrefabInstance: {fileID: 923734682}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &272217323 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4054575625725580, guid: e41985b88641bdb4585868535a3af673,
     type: 3}
   m_PrefabInstance: {fileID: 923734682}
   m_PrefabAsset: {fileID: 0}
@@ -1348,98 +1261,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 28
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &534234458
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 534234459}
-  - component: {fileID: 534234462}
-  - component: {fileID: 534234461}
-  - component: {fileID: 534234460}
-  m_Layer: 0
-  m_Name: shieldMesh
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &534234459
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 534234458}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 2.1, z: 1.5}
-  m_Children: []
-  m_Father: {fileID: 272217323}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &534234460
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 534234458}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &534234461
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 534234458}
-  m_Enabled: 0
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 56834f9398fdaf14eae21e642f4fb4f7, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
---- !u!33 &534234462
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 534234458}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &567767366
 GameObject:
   m_ObjectHideFlags: 0
@@ -2011,10 +1832,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerCamera
       objectReference: {fileID: 0}
-    - target: {fileID: 1422725697478738, guid: 6fbded8c3680f144e955596fff161d25, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4265322805897478, guid: 6fbded8c3680f144e955596fff161d25, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.92
@@ -2061,36 +1878,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 114050438318594796, guid: 6fbded8c3680f144e955596fff161d25,
         type: 3}
-      propertyPath: enemyLabels.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114050438318594796, guid: 6fbded8c3680f144e955596fff161d25,
-        type: 3}
-      propertyPath: enemyLabels.Array.data[0]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 114050438318594796, guid: 6fbded8c3680f144e955596fff161d25,
-        type: 3}
-      propertyPath: enemyUILabel
-      value: 
-      objectReference: {fileID: 543328654629608589, guid: 042d5e4f78a717b46928d677929e3dd6,
-        type: 3}
-    - target: {fileID: 114050438318594796, guid: 6fbded8c3680f144e955596fff161d25,
-        type: 3}
-      propertyPath: enemyUIMarker
-      value: 
-      objectReference: {fileID: 5576598730857249195, guid: 5e284447560169841b69c7261324b469,
-        type: 3}
-    - target: {fileID: 114050438318594796, guid: 6fbded8c3680f144e955596fff161d25,
-        type: 3}
       propertyPath: sniperCrosshair
       value: 
       objectReference: {fileID: 336925666}
-    - target: {fileID: 20124733330819424, guid: 6fbded8c3680f144e955596fff161d25,
-        type: 3}
-      propertyPath: field of view
-      value: 90
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6fbded8c3680f144e955596fff161d25, type: 3}
 --- !u!1001 &722111076
@@ -2726,10 +2516,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 1062120453602406, guid: e41985b88641bdb4585868535a3af673, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4054575625725580, guid: e41985b88641bdb4585868535a3af673, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2776,11 +2562,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
         type: 3}
-      propertyPath: weaponIcons.Array.size
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
       propertyPath: pauseMenu
       value: 
       objectReference: {fileID: 781325964}
@@ -2791,103 +2572,19 @@ PrefabInstance:
       objectReference: {fileID: 2004305805}
     - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
         type: 3}
-      propertyPath: missile
-      value: 
-      objectReference: {fileID: 5013150891506531918, guid: 35c566e4c11689943adfd3c8bd9d8f56,
-        type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: emptyTarget
-      value: 
-      objectReference: {fileID: 6648123863253316790, guid: e3dde7404be236943ae9a1cd62e41f57,
-        type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: mine
-      value: 
-      objectReference: {fileID: 3149664656692858452, guid: 3f829ae607cbbcf4283385d3b661da00,
-        type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: clusterBomb
-      value: 
-      objectReference: {fileID: 3718808770282685302, guid: e61f513482ee1a24fa3c36158a6d5ec4,
-        type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: sniperShell
-      value: 
-      objectReference: {fileID: 8721618092899671533, guid: b9dde1c4a13738848bbb105ed509b4a8,
-        type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: health
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: healthLimit
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: swordUIIcon
-      value: 
-      objectReference: {fileID: 2800000, guid: 4bd64547e9c83a74ba42984e47b9c40d, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: weaponIcons.Array.data[0]
-      value: 
-      objectReference: {fileID: 2800000, guid: 4bd64547e9c83a74ba42984e47b9c40d, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: weaponIcons.Array.data[1]
-      value: 
-      objectReference: {fileID: 2800000, guid: 9b7b90160a4d56d44b35f1f0d99c3e07, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: weaponIcons.Array.data[2]
-      value: 
-      objectReference: {fileID: 2800000, guid: 16d6dcd76c1948b4594b8731222dcee5, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: weaponIcons.Array.data[3]
-      value: 
-      objectReference: {fileID: 2800000, guid: 7d820e68fcc866541ad1e1372cfcccf7, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: weaponIcons.Array.data[4]
-      value: 
-      objectReference: {fileID: 2800000, guid: e3adbc939769da245ad6ee221f13c528, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: weaponIcons.Array.data[5]
-      value: 
-      objectReference: {fileID: 2800000, guid: e573b2402920ba8439d193a2bf38a716, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
-      propertyPath: weaponIcons.Array.data[6]
-      value: 
-      objectReference: {fileID: 2800000, guid: 581568b749ec62a469535b8f2ab8884c, type: 3}
-    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
-        type: 3}
       propertyPath: PlasmaLanceOverheatText
       value: 
       objectReference: {fileID: 945825864}
-    - target: {fileID: 23393101912750278, guid: e41985b88641bdb4585868535a3af673,
+    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
         type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 144195742, guid: e41985b88641bdb4585868535a3af673, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 23722008635439980, guid: e41985b88641bdb4585868535a3af673,
+      propertyPath: heavyGrabText
+      value: 
+      objectReference: {fileID: 240563441941146821}
+    - target: {fileID: 114634042636398500, guid: e41985b88641bdb4585868535a3af673,
         type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
+      propertyPath: cutsceneMenu
+      value: 
+      objectReference: {fileID: 50333557}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e41985b88641bdb4585868535a3af673, type: 3}
 --- !u!1 &925098311
@@ -4480,6 +4177,11 @@ PrefabInstance:
       propertyPath: m_Avatar
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2882586760145659475, guid: f47887705503ac943adc055abad9a4bf,
+        type: 3}
+      propertyPath: civs
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f47887705503ac943adc055abad9a4bf, type: 3}
 --- !u!1 &2060310150 stripped
@@ -4983,6 +4685,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e739388e53aeac249af8afd5a6ade80a, type: 3}
+--- !u!1 &240563441941146821 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2111081345, guid: e739388e53aeac249af8afd5a6ade80a,
+    type: 3}
+  m_PrefabInstance: {fileID: 240563441941146820}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4331639087590104571
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5149,12 +4857,6 @@ PrefabInstance:
       propertyPath: patrolWaypoints.Array.data[1]
       value: 
       objectReference: {fileID: 320226674}
-    - target: {fileID: 6371123066106808631, guid: 39870bdbd827ca444970b82b7436e4d9,
-        type: 3}
-      propertyPath: projectile
-      value: 
-      objectReference: {fileID: 1315303149542904, guid: 58cf5fbd29b3eac49a7e61c650ef58f5,
-        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 39870bdbd827ca444970b82b7436e4d9, type: 3}
 --- !u!1001 &7373617595780078229
@@ -5321,6 +5023,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SecurityMech
+      objectReference: {fileID: 0}
+    - target: {fileID: 8989069096635351380, guid: 2dda4812ba2f02a41ad68cbbd4761494,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8989069096635325812, guid: 2dda4812ba2f02a41ad68cbbd4761494,
         type: 3}

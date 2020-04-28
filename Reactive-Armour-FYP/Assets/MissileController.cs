@@ -131,6 +131,11 @@ public class MissileController : MonoBehaviour
                     col.gameObject.GetComponent<EnemySniperController>().lowerHealth(50);
                    
                 }
+                else if (col.gameObject.GetComponent<EnemyCombatEngineerController>() != null)
+                {
+                    col.gameObject.GetComponent<EnemyCombatEngineerController>().lowerHealth(50);
+
+                }
             }
             else
             if(col.gameObject.tag == "destructible")

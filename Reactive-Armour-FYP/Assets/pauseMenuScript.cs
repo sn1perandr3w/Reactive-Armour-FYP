@@ -21,6 +21,19 @@ public class pauseMenuScript : MonoBehaviour
     public void exitArea()
     {
         Time.timeScale = 1;
+
+        GameObject civController = GameObject.Find("civController");
+        int civSaved = PlayerPrefs.GetInt("civSaved");
+            
+          civSaved  += civController.GetComponent<civController>().actualCivAmount;
+        PlayerPrefs.SetInt("civSaved", civSaved);
+        PlayerPrefs.SetString("scene", SceneManager.GetActiveScene().name);
+
+        GameObject player = GameObject.FindGameObjectWithTag("player");
+
+        PlayerPrefs.SetInt("healthSaved", player.GetComponent<playerController>().health);
+        PlayerPrefs.SetInt("ammoSaved", player.GetComponent<playerController>().ammo);
+
         SceneManager.LoadScene("mapScreen");
     }
 

@@ -47,6 +47,11 @@ public class clusterBombScript : MonoBehaviour
                     col.gameObject.GetComponent<EnemySniperController>().lowerHealth(10);
                     col.gameObject.GetComponent<EnemySniperController>().initKnockBack(player.transform, 0.2f, 40.0f);
                 }
+
+                else if (col.gameObject.GetComponent<EnemyCombatEngineerController>() != null)
+                {
+                    col.gameObject.GetComponent<EnemyCombatEngineerController>().lowerHealth(10);
+                }
             }
             else
             if (col.gameObject.tag == "destructible")

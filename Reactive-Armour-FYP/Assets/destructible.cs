@@ -10,6 +10,8 @@ public class destructible : MonoBehaviour {
 	public int healthLimit;
 	public string destructibleName;
 
+    
+
 	// Use this for initialization
 	void Start () {
 		

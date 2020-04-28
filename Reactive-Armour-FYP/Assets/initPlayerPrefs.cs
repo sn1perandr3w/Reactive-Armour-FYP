@@ -8,10 +8,20 @@ public class initPlayerPrefs : MonoBehaviour {
 	void Start () {
 
 		PlayerPrefs.SetInt("civSaved",0);
-		PlayerPrefs.SetInt("combatEffectiveness",0);
-		PlayerPrefs.SetInt("level",0);
-		PlayerPrefs.SetInt("experience",0);
-		if (PlayerPrefs.GetInt ("difficulty") == null) {
+        PlayerPrefs.SetInt("F13CLEAR", 0);
+        PlayerPrefs.SetInt("R05CLEAR", 0);
+        PlayerPrefs.SetInt("D01CLEAR", 0);
+        PlayerPrefs.SetInt("U63CLEAR", 0);
+        PlayerPrefs.SetInt("S31CLEAR", 0);
+        PlayerPrefs.SetInt("allyMechsFound", 0);
+
+        PlayerPrefs.SetInt("healthSaved", 100);
+        PlayerPrefs.SetInt("ammoSaved", 100);
+
+
+
+
+        if (PlayerPrefs.GetInt ("difficulty") == null) {
 			PlayerPrefs.SetInt ("difficulty", 0);
 		}
 

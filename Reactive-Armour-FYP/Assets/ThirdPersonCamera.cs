@@ -112,6 +112,8 @@ public class ThirdPersonCamera : MonoBehaviour
             enemyLabel.GetComponent<Text>().text = enemy.GetComponent<EnemyMedicController>().enemyName;
             else if (enemy.GetComponent<EnemySniperController>() != null)
                 enemyLabel.GetComponent<Text>().text = enemy.GetComponent<EnemySniperController>().enemyName;
+            else if (enemy.GetComponent<EnemyCombatEngineerController>() != null)
+                enemyLabel.GetComponent<Text>().text = enemy.GetComponent<EnemyCombatEngineerController>().enemyName;
 
 
             enemyLabels.Add(enemyLabel);
@@ -174,7 +176,10 @@ public class ThirdPersonCamera : MonoBehaviour
 
 
                         float enemyDistanceToPlayer = Vector3.Distance(player.transform.position, enemy.transform.position);
-                        if (enemyDistanceToPlayer <= 100.0f && !enemiesInLockOnRange.Contains(enemy) && (enemy.GetComponent<enemyController>() != null && enemy.GetComponent<enemyController>().grabbed == false || enemy.GetComponent<EnemyMedicController>()!= null && enemy.GetComponent<EnemyMedicController>().grabbed == false || enemy.GetComponent<EnemySniperController>() != null && enemy.GetComponent<EnemySniperController>().grabbed == false))
+                        if (enemyDistanceToPlayer <= 100.0f && !enemiesInLockOnRange.Contains(enemy) && (enemy.GetComponent<enemyController>() != null && enemy.GetComponent<enemyController>().grabbed == false 
+                            || enemy.GetComponent<EnemyMedicController>()!= null && enemy.GetComponent<EnemyMedicController>().grabbed == false 
+                            || enemy.GetComponent<EnemySniperController>() != null && enemy.GetComponent<EnemySniperController>().grabbed == false 
+                            || enemy.GetComponent<EnemyCombatEngineerController>() != null && enemy.GetComponent<EnemyCombatEngineerController>().grabbed == false))
                         {
                             enemiesInLockOnRange.Add(enemy);
                             if (initialLockOn == true && zoom == false)
@@ -212,32 +217,44 @@ public class ThirdPersonCamera : MonoBehaviour
                 {
                     Vector3 enemyMarkerPos = this.GetComponent<Camera>().WorldToScreenPoint(enemies[i].transform.position + (transform.up * 1.0f));
                     Vector3 enemyLabelPos = enemyMarkerPos + (transform.up * 32.0f);
+
+                    if (enemyMarkerPos.z >= 0)
+                    {
+                        //print("BEHIND");
+                        //enemyMarkerPos.z *= -1;
+                        //enemyLabelPos.z *= -1;
+                    
+
                     enemyMarkers[i].transform.position = enemyMarkerPos;
                     enemyLabels[i].transform.position = enemyLabelPos;
 
-                    
+                    }
+
+                    //enemyMarkers[i].GetComponent<RawImage>().
+
 
                     if (enemiesInLockOnRange.Contains(enemies[i]) && enemies[i] != playerTarget)
-                    {
-                        //print("UI CHECK 1");
-                        enemyMarkers[i].GetComponent<RawImage>().color = new Color32(255, 153, 0, 255);
-                        enemyLabels[i].GetComponent<Text>().color = new Color32(255, 153, 0, 255);
-                    }
+                        {
+                            //print("UI CHECK 1");
+                            enemyMarkers[i].GetComponent<RawImage>().color = new Color32(255, 153, 0, 255);
+                            enemyLabels[i].GetComponent<Text>().color = new Color32(255, 153, 0, 255);
+                        }
 
+
+                        else if (enemies[i] == playerTarget)
+                        {
+                            //print("UI CHECK 2");
+                            enemyMarkers[i].GetComponent<RawImage>().color = new Color32(255, 0, 12, 255);
+                            enemyLabels[i].GetComponent<Text>().color = new Color32(255, 0, 12, 255);
+                        }
+
+                        else
+                        {
+                            //print("UI CHECK 3");
+                            enemyMarkers[i].GetComponent<RawImage>().color = new Color32(0, 255, 138, 255);
+                            enemyLabels[i].GetComponent<Text>().color = new Color32(0, 255, 138, 255);
+                        }
                     
-                    else if (enemies[i] == playerTarget)
-                    {
-                        //print("UI CHECK 2");
-                        enemyMarkers[i].GetComponent<RawImage>().color = new Color32(255, 0, 12, 255);
-                        enemyLabels[i].GetComponent<Text>().color = new Color32(255, 0, 12, 255);
-                    }
-
-                    else
-                    {
-                        //print("UI CHECK 3");
-                        enemyMarkers[i].GetComponent<RawImage>().color = new Color32(0, 255, 138, 255);
-                        enemyLabels[i].GetComponent<Text>().color = new Color32(0, 255, 138, 255);
-                    }
                     
                 }
             }
@@ -559,6 +576,9 @@ public class ThirdPersonCamera : MonoBehaviour
                 else
                     if (playerTarget.GetComponent<EnemySniperController>() != null)
                     GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy Health: " + playerTarget.GetComponent<EnemySniperController>().health + "%";
+                else
+                    if (playerTarget.GetComponent<EnemyCombatEngineerController>() != null)
+                    GameObject.Find("UIEnemyInfo").GetComponent<Text>().text = "Enemy Health: " + playerTarget.GetComponent<EnemyCombatEngineerController>().health + "%";
             }
             else
             {
@@ -667,9 +687,9 @@ public class ThirdPersonCamera : MonoBehaviour
         currentX = player.transform.eulerAngles.y;
 
 
-        if (camTarget.GetComponent<EnemyMedicController>() != null)
+        if (camTarget != null && camTarget.GetComponent<EnemyMedicController>() != null)
         {
-            
+            print("CAMTARGET THAT HAS MEDIC CONTROLLER = " + camTarget.name);
             camTarget.GetComponent<EnemyMedicController>().isTargeted = false;
         }
 

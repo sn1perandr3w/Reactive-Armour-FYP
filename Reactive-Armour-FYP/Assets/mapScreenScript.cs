@@ -29,5 +29,19 @@ public class mapScreenScript : MonoBehaviour {
         SceneManager.LoadScene("testRoom");
     }
 
+    public void S31()
+    {
+        SceneManager.LoadScene("AsteroidDuct");
+    }
+
+    public void D01()
+    {
+        SceneManager.LoadScene("ShipExteriorBoss");
+    }
+
+    public void U63()
+    {
+        SceneManager.LoadScene("ShipExterior");
+    }
 
 }

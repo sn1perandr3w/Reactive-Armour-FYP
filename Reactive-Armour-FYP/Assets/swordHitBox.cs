@@ -32,13 +32,13 @@ public class swordHitBox : MonoBehaviour
         {
             if (enemiesToHit.Count > 0)
             {
-                print("HITLOOP");
+                //print("HITLOOP");
                 foreach (GameObject enemy in enemiesToHit)
                 {
-                    print("HITLOOP2");
+                    //print("HITLOOP2");
                     if(enemy != null && !enemiesHit.Contains(enemy)) {
 
-                        print("COMBO HIT = " + comboHit);
+                        //print("COMBO HIT = " + comboHit);
 
                         if (comboHit >= 4)
                         {
@@ -61,6 +61,9 @@ public class swordHitBox : MonoBehaviour
                                 enemy.gameObject.GetComponent<EnemySniperController>().initKnockBack(transform.parent, 0.2f, 40.0f);
 
                             }
+                            
+
+
 
 
                         }
@@ -107,7 +110,18 @@ public class swordHitBox : MonoBehaviour
 
                         }
 
-                        
+                        else if (enemy.gameObject.GetComponent<EnemyCombatEngineerController>() != null)
+                        {
+                            enemy.gameObject.GetComponent<EnemyCombatEngineerController>().lowerHealth(damage);
+
+                        }
+                        else if (enemy.gameObject.GetComponent<destructible>() != null)
+                        {
+                            enemy.gameObject.GetComponent<destructible>().lowerHealth(damage);
+
+                        }
+
+
                         enemiesHit.Add(enemy);
                         }
                 }
@@ -119,7 +133,7 @@ public class swordHitBox : MonoBehaviour
 
         if (timeUntilStop <= 0 && activeHitbox == true)
         {
-            print("CLEARING");
+            //print("CLEARING");
             enemiesHit.Clear();
             enemiesToHit.Clear();
             hitboxInactive();
@@ -131,8 +145,8 @@ public class swordHitBox : MonoBehaviour
 
     private void OnTriggerStay(Collider collidedObject)
     {
-        //print("COLLIDING WITH " + collidedObject);
-        if (collidedObject.gameObject.tag == "enemy" && activeHitbox)
+       //print("TR COLLIDING WITH " + collidedObject);
+        if ((collidedObject.gameObject.tag == "enemy" || collidedObject.gameObject.tag == "destructible") && activeHitbox)
         {
             if (!enemiesToHit.Contains(collidedObject.gameObject))
             {
@@ -140,11 +154,39 @@ public class swordHitBox : MonoBehaviour
             }
         }
     }
+    /*
+    private void OnCollisionEnter(Collision collidedObject)
+    {
+        print("C COLLIDING WITH " + collidedObject);
+        if ((collidedObject.gameObject.tag == "destructible") && activeHitbox)
+        {
+            if (!enemiesToHit.Contains(collidedObject.gameObject))
+            {
+                enemiesToHit.Add(collidedObject.gameObject);
+            }
+        }
+    }
+    */
 
+    /*
+    private void OnControllerColliderHit(ControllerColliderHit collidedObject)
+    {
+       
+            print("CCH COLLIDING WITH " + collidedObject);
+            if ((collidedObject.gameObject.tag == "destructible") && activeHitbox)
+            {
+                if (!enemiesToHit.Contains(collidedObject.gameObject))
+                {
+                    enemiesToHit.Add(collidedObject.gameObject);
+                }
+            }
+      
+    }
+    */
     public void hitboxInactive()
     {
         
-        print("DEACTIVATING");
+        //print("DEACTIVATING");
         activeHitbox = false;
     }
 
@@ -156,6 +198,6 @@ public class swordHitBox : MonoBehaviour
         this.timeUntilStop = timeUntilStop;
         this.comboHit = comboHit;
         activeHitbox = true;
-        print("ACTIVATING");
+        //print("ACTIVATING");
     }
 }

@@ -59,7 +59,7 @@ public class enemyController : MonoBehaviour
 	int waypointNum = 0;
 
 
-	float attackCooldown = 0.0f;
+	public float attackCooldown = 0.0f;
 
 	//Time until returning to patrol
 	float timeUntilPatrol = 0;
@@ -67,7 +67,7 @@ public class enemyController : MonoBehaviour
 	public GameObject player;
 	float distanceToPlayer;
 
-	int selection;
+	public int selection;
 	float strafeTimer;
 	int strafeDir;
 
@@ -107,21 +107,7 @@ public class enemyController : MonoBehaviour
 
 		selection = Random.Range (1, 4);
 
-		if (player.GetComponent<playerController> ().getCombatEffectiveness () < 500) {
-			healthLimit = 100;
-			health = 100;
-			enemyName = "Tyrant mod.B";
-		} else 
-		if (player.GetComponent<playerController> ().getCombatEffectiveness () >= 500) {
-			healthLimit = 200;
-			health = 200;
-			enemyName = "Tyrant mod.A";
-		} else 
-		if (player.GetComponent<playerController> ().getCombatEffectiveness () >= 1000) {
-				healthLimit = 300;
-				health = 300;
-				enemyName = "Tyrant mod.EX";
-		}
+		
 
 		foreach (GameObject civTarget in GameObject.FindGameObjectsWithTag("destructible")) {
 			if (civTarget.GetComponent<civEntity> () != null) {
@@ -261,14 +247,18 @@ public class enemyController : MonoBehaviour
 
 	public void meleeAttack ()
 	{
-		if (attackCooldown <= 0.0f) {
+        //print(this.name + " Melee Attack");
+
+        if (attackCooldown <= 0.0f) {
 			//Melee hit
 			RaycastHit matkHit;
 
-			if (Physics.Raycast (transform.position, transform.forward, out matkHit, 10.0f)) {
-				print ("Enemy Hit: " + matkHit.transform.gameObject);
+            
+
+			if (Physics.Raycast (transform.position, transform.forward, out matkHit, 12.0f)) {
+				//print ("Enemy Hit: " + matkHit.transform.gameObject);
 				if (matkHit.transform.gameObject.tag == "player") {
-					print ("SHOULD BE LOWERING HEALTH");
+					//print ("SHOULD BE LOWERING HEALTH");
 					matkHit.transform.gameObject.GetComponent<playerController> ().lowerHealth (20);
 				}
 			}
@@ -284,8 +274,10 @@ public class enemyController : MonoBehaviour
 
 	public void rangedAttack ()
 	{
-		if (attackCooldown <= 0.0f) {
-			print ("RANGED ATTACK!");
+        //print(this.name + " Ranged Attack");
+
+       if (attackCooldown <= 0.0f) {
+			//print ("RANGED ATTACK!");
 			
 			GameObject g = (GameObject)Instantiate (projectile, transform.position + transform.forward * 3.0f, Quaternion.identity);	
 			g.GetComponent<Rigidbody> ().AddForce (transform.forward * 4000);
@@ -318,7 +310,7 @@ public class enemyController : MonoBehaviour
 			if (Physics.SphereCast (origin, sphereRadius, direction, out hit, maxDistance, layerMask, QueryTriggerInteraction.UseGlobal)) {
 				currentHitObject = hit.transform.gameObject;
 				currentHitDistance = hit.distance;
-				print (hit.transform.gameObject.name);
+				//print (hit.transform.gameObject.name);
 
 				if (currentHitObject.tag != "player") {
 					//TESTING UP
@@ -482,8 +474,11 @@ public class enemyController : MonoBehaviour
         }
 
 
-		Vector3 pos = (target.position + (transform.up * 1)) - transform.position;
-		Quaternion rotation = Quaternion.LookRotation (pos);
+        //Vector3 pos = (target.position + (transform.up * 1)) - transform.position;
+        Vector3 pos = (target.position) - transform.position;
+
+
+        Quaternion rotation = Quaternion.LookRotation (pos);
 
 		transform.rotation = Quaternion.Slerp (transform.rotation, rotation, rotationalDamp * Time.deltaTime);
 
@@ -657,12 +652,12 @@ public class enemyController : MonoBehaviour
                 anim.SetTrigger("guard");
             }
 		}*/
-
+        /*
         if (attackCooldown <= 0.0f)
         {
             newSelection();
         }
-
+        */
         if (strafeTimer <= 0.0f)
         {
             strafeDirFB = Random.Range(0, 3);
@@ -671,19 +666,20 @@ public class enemyController : MonoBehaviour
         }
         else if (attackCooldown <= 0.0f)
         {
-            if (selection == 1 && distanceToPlayer <= 6.0f)
+            if (selection == 1 && distanceToPlayer <= 10.0f)
             {
-
+                triggerForReturn = "combat";
                 anim.SetTrigger("melee");
             }
-            else if (selection == 2)
+            else if (selection == 2 && distanceToPlayer > 10.0f || selection == 2)
             {
                 triggerForReturn = "combat";
                 anim.SetTrigger("ranged");
+                
             }
             else if (selection == 3)
             {
-
+                triggerForReturn = "combat";
                 anim.SetTrigger("guard");
             }
         }
@@ -730,6 +726,9 @@ public class enemyController : MonoBehaviour
 			int dropSel = Random.Range(1, 100);
 			int itemSel = Random.Range(0,2);
 
+            print("DropSel: " + dropSel + " ItemSel: " + itemSel);
+
+
 			print ("DROPSEL: " + dropSel + " ITEMSEL: " + itemSel);
 			if (itemSel == 0) {
 				if (player.GetComponent<playerController> ().getHealth () < 50) {
@@ -742,15 +741,15 @@ public class enemyController : MonoBehaviour
 					dropSel += 40;
 				}
 			}
-            else
+            
 			if(dropSel >= 80)
 			{
 				GameObject g = (GameObject)Instantiate (itemDrop[itemSel], transform.position, Quaternion.identity);
 			}
 
 			GameObject e = (GameObject)Instantiate(explosionSound, transform.position, Quaternion.identity);
-			player.GetComponent<playerController> ().increaseExperience (100);
-			player.GetComponent<playerController> ().increaseCombatEffectiveness (100);
+			//player.GetComponent<playerController> ().increaseExperience (100);
+			//player.GetComponent<playerController> ().increaseCombatEffectiveness (100);
 
 			Destroy (this.gameObject);
 		}

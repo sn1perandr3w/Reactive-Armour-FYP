@@ -122,26 +122,7 @@ public class EnemyMedicController : MonoBehaviour
 
         selection = Random.Range(1, 4);
 
-        if (player.GetComponent<playerController>().getCombatEffectiveness() < 500)
-        {
-            healthLimit = 100;
-            health = 100;
-            enemyName = "Tyrant mod.B";
-        }
-        else
-        if (player.GetComponent<playerController>().getCombatEffectiveness() >= 500)
-        {
-            healthLimit = 200;
-            health = 200;
-            enemyName = "Tyrant mod.A";
-        }
-        else
-        if (player.GetComponent<playerController>().getCombatEffectiveness() >= 1000)
-        {
-            healthLimit = 300;
-            health = 300;
-            enemyName = "Tyrant mod.EX";
-        }
+       
 
         foreach (GameObject civTarget in GameObject.FindGameObjectsWithTag("destructible"))
         {
@@ -173,8 +154,15 @@ public class EnemyMedicController : MonoBehaviour
 
         Debug.DrawRay(transform.position, transform.forward * 3.0f, Color.blue);
 
-        print("Target = " + target);
+        //print("Target = " + target);
 
+        for (int i = 0; i < allies.Count; i++)
+        {
+            if (allies[i] == null)
+            {
+                allies.RemoveAt(i);
+            }
+        }
 
 
         if (distanceToPlayer < 100.0f && pursueBuffer <= 0.0f && (info.IsName("Patrolling") || info.IsName("Searching") || info.IsName("CombatCiv")))
@@ -215,7 +203,7 @@ public class EnemyMedicController : MonoBehaviour
         }
         else if (info.IsName("Patrolling"))
         {
-            print("Target = " + target);
+            //print("Target = " + target);
             //print ("PATROLLING");
             CollisionAvoidance();
             CheckForCivTargets();
@@ -689,7 +677,7 @@ public class EnemyMedicController : MonoBehaviour
                 }
             }
             target = patrolWaypoints[waypointNum].transform;
-            print("Target = " + target);
+            //print("Target = " + target);
         }
     }
 
@@ -782,7 +770,11 @@ public class EnemyMedicController : MonoBehaviour
 
 
                 }
-                else if (alliesInHealingRange[i] == null || allyDistance > 100.0f && alliesInHealingRange.Contains(allies[i]) && (allies[i].GetComponent<enemyController>() != null && allies[i].GetComponent<enemyController>().health >= 100 || allies[i].GetComponent<EnemyMedicController>() != null && allies[i].GetComponent<EnemyMedicController>().health >= 100 || allies[i].GetComponent<EnemySniperController>() != null && allies[i].GetComponent<EnemySniperController>().health >= 75))
+                else if (allyDistance > 100.0f 
+                    && alliesInHealingRange.Contains(allies[i]) 
+                    && (allies[i].GetComponent<enemyController>() != null && allies[i].GetComponent<enemyController>().health >= 100 
+                    || allies[i].GetComponent<EnemyMedicController>() != null && allies[i].GetComponent<EnemyMedicController>().health >= 100 
+                    || allies[i].GetComponent<EnemySniperController>() != null && allies[i].GetComponent<EnemySniperController>().health >= 40))
                 {
                     alliesInHealingRange.Remove(allies[i]);
                 }

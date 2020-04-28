@@ -22,7 +22,7 @@ public class projectileScript : MonoBehaviour {
 	void OnCollisionEnter(Collision coll)
 	{
 
-       
+        print("COLLISION: " + coll.gameObject.name);
 
         //Removes health from Player.
         if (allyProjectile != true)
@@ -62,6 +62,12 @@ public class projectileScript : MonoBehaviour {
                 else if (coll.gameObject.GetComponent<EnemySniperController>() != null)
                 {
                     coll.gameObject.GetComponent<EnemySniperController>().lowerHealth(100);
+
+                }
+
+                else if (coll.gameObject.GetComponent<EnemyCombatEngineerController>() != null)
+                {
+                    coll.gameObject.GetComponent<EnemyCombatEngineerController>().lowerHealth(20);
 
                 }
 

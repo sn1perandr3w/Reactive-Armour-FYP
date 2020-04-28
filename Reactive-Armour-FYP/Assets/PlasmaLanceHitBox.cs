@@ -71,6 +71,11 @@ public class PlasmaLanceHitBox : MonoBehaviour
                         if (enemiesToHit[i].GetComponent<EnemySniperController>() != null)
                             enemiesToHit[i].GetComponent<EnemySniperController>().lowerHealth(damage);
 
+                        if (enemiesToHit[i].GetComponent<EnemyCombatEngineerController>() != null)
+                            enemiesToHit[i].GetComponent<EnemyCombatEngineerController>().lowerHealth(damage);
+
+                        if (enemiesToHit[i].GetComponent<destructible>() != null)
+                            enemiesToHit[i].GetComponent<destructible>().lowerHealth(damage);
 
                         enemyInvincibility[i] = 0.5f;
                     }
@@ -108,7 +113,7 @@ public class PlasmaLanceHitBox : MonoBehaviour
     private void OnTriggerStay(Collider collidedObject)
     {
         //print("COLLIDING WITH " + collidedObject);
-        if (collidedObject.gameObject.tag == "enemy" && activeHitbox)
+        if ((collidedObject.gameObject.tag == "enemy" || collidedObject.gameObject.tag == "destructible") && activeHitbox)
         {
             if (!enemiesToHit.Contains(collidedObject.gameObject))
             {
@@ -121,7 +126,7 @@ public class PlasmaLanceHitBox : MonoBehaviour
     private void OnTriggerExit(Collider collidedObject)
     {
         //print("COLLIDING WITH " + collidedObject);
-        if (collidedObject.gameObject.tag == "enemy")
+        if (collidedObject.gameObject.tag == "enemy" || collidedObject.gameObject.tag == "destructible")
         {
             if (enemiesToHit.Contains(collidedObject.gameObject))
             {

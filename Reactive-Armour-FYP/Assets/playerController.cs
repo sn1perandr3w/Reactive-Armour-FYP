@@ -26,7 +26,7 @@ public class playerController : MonoBehaviour
 
 
 	public int ammoLimit;
-	int ammo;
+	public int ammo;
 	int civSaved;
 	public bool ableToEscape;
 	public string objective = "NONE";
@@ -102,8 +102,23 @@ public class playerController : MonoBehaviour
     public GameObject PlasmaLanceOverheatText;
     public bool plasmaLanceOverheated = false;
 
+    public float heavyGrabTextTimer = 0.0f;
+    public GameObject heavyGrabText;
+
+    public GameObject cutsceneMenu;
+
+    public float plasmaLanceAmmoDecrement = 0.0f;
+
+
+    public Animator anim;
+    public AnimatorStateInfo info;
+    public GameObject avatar;
+
     void Start()
 	{
+        anim = avatar.GetComponent<Animator>();
+        info = anim.GetCurrentAnimatorStateInfo(0);
+
         swordHitbox = this.gameObject.transform.GetChild(2).gameObject;
         plasmaLanceHitbox = this.gameObject.transform.GetChild(3).gameObject;
 
@@ -123,16 +138,16 @@ public class playerController : MonoBehaviour
 		audiosource2.loop = true;
 		audiosource2.clip = lowHealth;
 
-		//healthLimit = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
-		//health = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
+		healthLimit = 100;
+		health = PlayerPrefs.GetInt("healthSaved");
         shieldHealth = 100;
-		ammoLimit = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
-		ammo = 100 + (PlayerPrefs.GetInt ("difficulty") * 25);
+        ammoLimit = 100;
+		ammo = PlayerPrefs.GetInt("ammoSaved");
 
-		combatEffectiveness = (PlayerPrefs.GetInt ("combatEffectiveness"));
+        //combatEffectiveness = (PlayerPrefs.GetInt ("combatEffectiveness"));
 
-		level = (PlayerPrefs.GetInt ("level"));
-		experience = (PlayerPrefs.GetInt ("experience"));
+		//level = (PlayerPrefs.GetInt ("level"));
+		//experience = (PlayerPrefs.GetInt ("experience"));
 
 		civSaved = PlayerPrefs.GetInt("civSaved");
 		
@@ -200,13 +215,18 @@ public class playerController : MonoBehaviour
             //GameObject.Find("UITotalCivs").GetComponent<Text>().text = "Total Saved: " + civSaved;
             //GameObject.Find("UILevel").GetComponent<Text>().text = "Level: " + level;
             
-            Debug.DrawRay(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, Color.red);
+            Debug.DrawRay(transform.position + (transform.forward * 1.0f), transform.forward * 240.0f, Color.red);
 
 
 
-            if (attackCooldown > 0)
+            if (attackCooldown > 0.0f)
             {
                 attackCooldown -= Time.deltaTime;
+            }
+
+            if (shieldRechargeDelay > 0.0f)
+            {
+                shieldRechargeDelay -= Time.deltaTime;
             }
 
             if (plasmaLanceOverheatTime > 0.0f && !Input.GetKey(KeyCode.Mouse0) || plasmaLanceOverheatTime > 0.0f && attackCooldown > 0.0f)
@@ -245,6 +265,21 @@ public class playerController : MonoBehaviour
             {
                 comboHit = 0;
             }
+
+            if (heavyGrabTextTimer > 0)
+            {
+                heavyGrabTextTimer -= Time.deltaTime;
+
+                if (heavyGrabText.activeSelf == false)
+                {
+                    heavyGrabText.SetActive(true);
+                }
+            }
+            else
+            {
+                heavyGrabText.SetActive(false);
+            }
+
 
             if (lunging == true)
             {
@@ -377,10 +412,13 @@ public class playerController : MonoBehaviour
             if (shieldHealth < 0)
             {
                 shieldHealth = 0;
+                guarding = false;
+                shieldRenderer.enabled = false;
             }
+            shieldRechargeDelay = 4.5f;
         }
 
-        shieldRechargeDelay = 4.5f;
+        
     }
 
 
@@ -393,6 +431,13 @@ public class playerController : MonoBehaviour
         else
         {
             guarding = false;
+
+            if (info.IsName("Shield"))
+            {
+                anim.ResetTrigger("shield");
+                anim.SetTrigger("idle");
+            }
+
         }
 	}
 
@@ -415,6 +460,8 @@ public class playerController : MonoBehaviour
         //Sword
         if (weaponSelect == 0 && attackCooldown <= 0.0f)
         {
+            anim.SetTrigger("attack");
+
             lunging = true;
             lungeTime = 0.2f;
             comboHit++;
@@ -423,7 +470,7 @@ public class playerController : MonoBehaviour
 
 
             comboTimer = 1.0f;
-            print("COMBOHIT = " + comboHit);
+            //print("COMBOHIT = " + comboHit);
 
             if (comboHit == 4)
             {
@@ -453,7 +500,10 @@ public class playerController : MonoBehaviour
         {
             if (ammo >= 10)
             {
-                if (Physics.Raycast(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, out hit))
+
+
+                //if (Physics.Raycast(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, out hit, QueryTriggerInteraction.Ignore))
+                if (Physics.Raycast(transform.position, transform.forward, out hit, 240.0f, 1, QueryTriggerInteraction.Ignore))
                 {
                     print("Player Hit: " + hit.transform.gameObject);
                     if (hit.transform.gameObject.tag == "destructible" && attackCooldown <= 0.0f)
@@ -480,6 +530,12 @@ public class playerController : MonoBehaviour
                         {
                             print("SHOULD BE LOWERING HEALTH");
                             hit.transform.gameObject.GetComponent<EnemySniperController>().lowerHealth(Mathf.RoundToInt(50 * damageMultiplier));
+                        }
+                        else
+                        if (hit.transform.gameObject.GetComponent<EnemyCombatEngineerController>() != null && attackCooldown <= 0.0f)
+                        {
+                            print("SHOULD BE LOWERING HEALTH");
+                            hit.transform.gameObject.GetComponent<EnemyCombatEngineerController>().lowerHealth(Mathf.RoundToInt(50 * damageMultiplier));
                         }
                     }
                 }
@@ -521,17 +577,26 @@ public class playerController : MonoBehaviour
             }
             else if (playerCamera.GetComponent<ThirdPersonCamera>().playerTarget != null && playerCamera.GetComponent<ThirdPersonCamera>().playerTarget.tag == "enemy" && grabHeld == false)
             {
-                grabTarget = playerCamera.GetComponent<ThirdPersonCamera>().playerTarget;
-                playerCamera.GetComponent<ThirdPersonCamera>().enemiesInLockOnRange.Remove(grabTarget);
-                playerCamera.GetComponent<ThirdPersonCamera>().grabCameraReset();
-                grabHeld = true;
+                if (playerCamera.GetComponent<ThirdPersonCamera>().playerTarget.GetComponent<EnemyCombatEngineerController>() == null)
+                {
+                    grabTarget = playerCamera.GetComponent<ThirdPersonCamera>().playerTarget;
+                    playerCamera.GetComponent<ThirdPersonCamera>().enemiesInLockOnRange.Remove(grabTarget);
+                    playerCamera.GetComponent<ThirdPersonCamera>().grabCameraReset();
+                    grabHeld = true;
+                }
+                else
+                {
+                    heavyGrabTextTimer = 3.0f;
+                }
             }
         }
 
         else
         //Mine
-            if (weaponSelect == 3 && attackCooldown <= 0.0f)
+            if (weaponSelect == 3 && attackCooldown <= 0.0f && ammo >= 25)
         {
+            anim.SetTrigger("attack");
+
             //Vector3 minePosition = transform.position + (transform.forward * -1.0f);
 
             Vector3 xyz = new Vector3(transform.eulerAngles.x - 90, transform.eulerAngles.y, transform.eulerAngles.z);
@@ -544,12 +609,15 @@ public class playerController : MonoBehaviour
 
 
             attackCooldown = 6.0f;
+            ammo -= 25;
         }
 
         else
         //Missile
-            if (weaponSelect == 4 && attackCooldown <= 0.0f)
+            if (weaponSelect == 4 && attackCooldown <= 0.0f && ammo >= 25)
         {
+
+            anim.SetTrigger("attack");
 
             //Vector3 missilePosition = transform.position + (transform.forward * -1.0f) + (transform.right * -0.5f);
 
@@ -578,7 +646,7 @@ public class playerController : MonoBehaviour
                 else
 
 
-                if (Physics.Raycast(transform.position + (transform.forward * 1.0f), transform.forward * 120.0f, out hit))
+                if (Physics.Raycast(transform.position, transform.forward, out hit, 120.0f, 1, QueryTriggerInteraction.Ignore))
                 {
                     GameObject h = (GameObject)Instantiate(emptyTarget, hit.point, Quaternion.identity);
                     h.name = "HitTarget";
@@ -598,15 +666,17 @@ public class playerController : MonoBehaviour
 
 
             }
-
+            
             attackCooldown = 6.0f;
+
+            ammo -= 25;
         }
 
         else
         //Cluster Bomb
-            if (weaponSelect == 5 && attackCooldown <= 0.0f && clusterBombsDeployed == false)
+            if (weaponSelect == 5 && attackCooldown <= 0.0f && clusterBombsDeployed == false && ammo >= 20)
         {
-
+            anim.SetTrigger("attack");
 
             for (int i = 0; i < 8; i++)
             {
@@ -624,12 +694,16 @@ public class playerController : MonoBehaviour
 
             print("CLUSTER BOMB");
             clusterBombsDeployed = true;
+
+            ammo -= 20;
         }
 
         else
         //Plasma Lance
-            if (weaponSelect == 6 && attackCooldown <= 0.0f)
+            if (weaponSelect == 6 && attackCooldown <= 0.0f && ammo >= 10)
         {
+            anim.SetTrigger("attack");
+
             plasmaLanceOverheatTime += Time.deltaTime;
             if (PlasmaLanceOverheatText.activeSelf != true)
             {
@@ -639,6 +713,14 @@ public class playerController : MonoBehaviour
             PlasmaLanceOverheatText.GetComponent<Text>().text = "Heat: " + (plasmaLanceOverheatTime / 6.0f * 100 / 1).ToString("F0") + "%";
 
             print("PLASMA LANCE");
+
+            plasmaLanceAmmoDecrement += Time.deltaTime;
+
+            if (plasmaLanceAmmoDecrement >= 1.0f)
+            {
+                ammo -= 10;
+                plasmaLanceAmmoDecrement = 0.0f;
+            }
 
             if (attackKeyDownTime > 2.0f)
             {
@@ -718,6 +800,10 @@ public class playerController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.Mouse0))
         {
+
+            anim.ResetTrigger("attack");
+            anim.SetTrigger("idle");
+
             attackKeyDownTime = 0.0f;
 
             if (weaponSelect == 6 && attackCooldown <= 0.0f)
@@ -774,23 +860,35 @@ public class playerController : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Mouse1))
         {
             shieldRenderer.enabled = false;
+
+            if (info.IsName("Shield"))
+            {
+                anim.ResetTrigger("shield");
+                anim.SetTrigger("idle");
+            }
+
         }
 
         if (Input.GetKey (KeyCode.Mouse1)) {
-			print ("GUARDING");
+			//print ("GUARDING");
 			guard ();
 
             if (guarding == true)
             {
                 shieldRenderer.enabled = true;
+
+                
             }
             
 		} else 
 		{
 			guarding = false;
-		}
+            shieldRenderer.enabled = false;
 
-		if (Input.GetKeyDown (KeyCode.F1)) {
+            
+        }
+
+		if (Input.GetKeyDown (KeyCode.Escape)) {
 
            
 
@@ -824,7 +922,35 @@ public class playerController : MonoBehaviour
                 HUD.SetActive(true);
                 
             }
-		} 
+		}
+
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            if (Time.timeScale == 1)
+            {
+                Time.timeScale = 0;
+                pausedGame = true;
+                playerCamera.GetComponent<ThirdPersonCamera>().pausedGame = true;
+
+                cutsceneMenu.SetActive(true);
+                HUD.SetActive(false);
+               
+
+
+            }
+            else
+            {
+                Time.timeScale = 1;
+                pausedGame = false;
+                playerCamera.GetComponent<ThirdPersonCamera>().pausedGame = false;
+
+                cutsceneMenu.SetActive(false);
+                HUD.SetActive(true);
+
+            }
+        }
+
+
 
 		if (Input.GetKeyDown (KeyCode.Tab)) {
 
@@ -838,6 +964,7 @@ public class playerController : MonoBehaviour
             GameObject.Find("UIWeaponIcon").GetComponent<RawImage>().texture = weaponIcons[weaponSelect];
         } 
 
+        /*
 		if (Input.GetKey (KeyCode.Escape)) {
 			if (ableToEscape == true) {
 				GameObject civController = GameObject.Find("civController");
@@ -853,6 +980,8 @@ public class playerController : MonoBehaviour
 				print ("Cannot escape!");
 			}
 		}
+        */
+
 
 		if(Input.GetKey(KeyCode.Space)) {
 			//print("VERTICAL MOVEMENT");

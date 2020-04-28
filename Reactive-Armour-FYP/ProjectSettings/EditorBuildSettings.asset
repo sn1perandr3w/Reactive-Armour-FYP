@@ -6,17 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/safeZone.unity
-    guid: e1f50b4a6e8412943a4e9a1e9e5a3c74
-  - enabled: 1
-    path: Assets/instructionScreen.unity
-    guid: ad71932ee9c469246a6375dba68fecf7
-  - enabled: 1
-    path: Assets/gameOverScreen.unity
-    guid: 194a3a026a4c780488d1249ee56dc034
-  - enabled: 1
     path: Assets/splashscreen.unity
     guid: 8819027f132b3524a8263dd32c5fd985
+  - enabled: 1
+    path: Assets/safeZone.unity
+    guid: e1f50b4a6e8412943a4e9a1e9e5a3c74
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
     path: Assets/optionsScreen.unity
     guid: cedf14531b2306b4ebf365860fc67a9f
@@ -35,4 +35,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ShipInterior.unity
     guid: e6a94a61725b94a49954bbcbea5da1e5
+  - enabled: 1
+    path: Assets/AsteroidDuct.unity
+    guid: 3ac54a92582a7a045aeb560ff0d74162
+  - enabled: 1
+    path: Assets/ShipExteriorBoss.unity
+    guid: a093a05c441aea54584577ae0f0cfb02
+  - enabled: 1
+    path: Assets/instructionScreen.unity
+    guid: 36cdaca0845df5c4fbb69d3d50e7c745
+  - enabled: 1
+    path: Assets/gameEndScreen.unity
+    guid: 560f08deb1e0f754fa4c37d0ee2bebf0
   m_configObjects: {}
